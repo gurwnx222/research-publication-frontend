@@ -2,7 +2,8 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home"; 
 import Dashboard from "./pages/Dashboard"; 
 import JournalRegistrationForm from "./pages/Publication"; // adjust path
-
+import Department from "./pages/Department"
+import Users from "./pages/Users"
 function App() {
   return (
     <Router>
@@ -10,6 +11,8 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/add-publication" element={<JournalRegistrationForm />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/department" element={<Department/>} />
+        <Route path="/users" element={<Users />}/>
       </Routes>
     </Router>
   );

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Home, User, Building, X } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 /**
  * Sidebar Navigation Component
@@ -15,8 +16,9 @@ const Sidebar = ({
   activeTab = 'dashboard', 
   onTabChange 
 }) => {
+  const navigate = useNavigate();
   const [currentTab, setCurrentTab] = useState(activeTab);
-
+  
   // Menu items configuration
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Home },
@@ -24,13 +26,19 @@ const Sidebar = ({
     { id: 'departments', label: 'Departments', icon: Building }
   ];
 
-  // Handle tab click
   const handleTabClick = (tabId) => {
     setCurrentTab(tabId);
-    if (onTabChange) {
-      onTabChange(tabId);
-    }
-    // Close sidebar on mobile after selection
+    if (onTabChange) onTabChange(tabId);
+
+    const pathMap = {
+      dashboard: '/dashboard',
+      departments: '/department',
+      users: '/users',
+    };
+
+    const target = pathMap[tabId];
+    if (target) navigate(target);
+
     if (window.innerWidth < 1024) {
       onClose();
     }
