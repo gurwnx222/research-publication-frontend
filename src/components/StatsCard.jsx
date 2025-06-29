@@ -13,6 +13,7 @@ import React from "react";
 const StatsCard = ({
   title,
   count,
+  icon: IconComponent, // Rename for clarity
   bgColor = "bg-white",
   iconColor = "text-blue-500",
   textColor = "text-gray-700",
@@ -31,7 +32,9 @@ const StatsCard = ({
         <div
           className={`p-3 rounded-full bg-gradient-to-r from-blue-50 to-purple-50`}
         >
-          <Icon className={`w-6 h-6 ${iconColor}`} />
+          {IconComponent && (
+            <IconComponent className={`w-6 h-6 ${iconColor}`} />
+          )}
         </div>
       </div>
     </div>
