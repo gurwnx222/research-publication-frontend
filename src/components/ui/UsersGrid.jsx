@@ -1,8 +1,8 @@
 import React from "react";
-import UserCard from "../UserCard";
+import UserCard from "./UserCard";
 import LoadingComponent from "./LoadingComponent";
-import EmptyState from "../EmptyState";
-import Pagination from "../Pagination";
+import EmptyState from "./EmptyState";
+import Pagination from "./Pagination";
 
 const UsersGrid = ({
   users,
