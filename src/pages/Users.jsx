@@ -4,48 +4,11 @@ import DashboardHeader from "../components/ui/DashboardHeader";
 import SearchBar from "../components/SearchBar";
 import UsersGrid from "../components/ui/UsersGrid";
 import CreateUserModal from "../components/CreateUserModal";
-import useUsersDashboard from "../hooks/useUsersDashboard";
 import StatsCard from "../components/StatsCard";
 import "../App.css";
 import { Users as UsersIcon } from "lucide-react"; // <-- FIX: Rename the import
 
 export default function Users() {
-  // Mock API service should be passed here; replace with your real API service if available
-  const mockApiService = {
-    fetchUsers: async (page, perPage, search) => {
-      // Replace with real API call
-      return {
-        users: [],
-        totalPages: 1,
-        currentPage: 1,
-        hasNextPage: false,
-        hasPrevPage: false,
-      };
-    },
-    getTotalUserCount: async () => ({
-      total: 0,
-      active: 0,
-      inactive: 0,
-    }),
-    deleteUser: async (id) => ({}),
-    createUser: async (user) => ({}),
-  };
-
-  const {
-    users,
-    isModalOpen,
-    loading,
-    searchTerm,
-    pagination,
-    stats,
-    handleDelete,
-    handleCreateUser,
-    handlePageChange,
-    handleSearchChange,
-    openModal,
-    closeModal,
-  } = useUsersDashboard(mockApiService);
-
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
       {/* Sidebar */}
@@ -54,14 +17,11 @@ export default function Users() {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col lg:ml-0">
         {/* Header */}
-        <DashboardHeader onCreateUser={openModal} />
+        <DashboardHeader onCreateUser={() => {}} />
 
         {/* Search Bar */}
         <div className="px-6">
-          <SearchBar
-            searchTerm={searchTerm}
-            onSearchChange={handleSearchChange}
-          />
+          <SearchBar searchTerm={{}} onSearchChange={() => {}} />
         </div>
 
         {/* Stats Cards */}
@@ -69,13 +29,13 @@ export default function Users() {
           <StatsCard title="Total Users" count={1234} icon={UsersIcon} />
           <StatsCard
             title="Active Users"
-            count={stats.active}
+            count={[]}
             iconColor="text-green-500"
             icon={UsersIcon}
           />
           <StatsCard
             title="Inactive Users"
-            count={stats.inactive}
+            count={[]}
             iconColor="text-gray-400"
             icon={UsersIcon}
           />
@@ -84,22 +44,18 @@ export default function Users() {
         {/* Users Grid */}
         <main className="flex-1 px-6">
           <UsersGrid
-            users={users}
-            loading={loading}
-            searchTerm={searchTerm}
-            pagination={pagination}
-            onDelete={handleDelete}
-            onPageChange={handlePageChange}
-            onCreateUser={openModal}
+            users={[]}
+            loading={false}
+            searchTerm={{}}
+            pagination={{}}
+            onDelete={() => {}}
+            onPageChange={() => {}}
+            onCreateUser={() => {}}
           />
         </main>
       </div>
       {/* Create User Modal */}
-      <CreateUserModal
-        isOpen={isModalOpen}
-        onClose={closeModal}
-        onSubmit={handleCreateUser}
-      />
+      <CreateUserModal isOpen={false} onClose={() => {}} onSubmit={() => {}} />
     </div>
   );
 }
