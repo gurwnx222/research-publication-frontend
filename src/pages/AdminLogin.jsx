@@ -341,9 +341,7 @@ export default function AdminLogin() {
 
         {/* Additional Info */}
         <div className="mt-8 text-center">
-          <p className="text-xs text-gray-500">
-            Protected by enterprise-grade security
-          </p>
+          <p className="text-xs text-gray-500">Protected by RIMT IT security</p>
         </div>
       </div>
     </div>
