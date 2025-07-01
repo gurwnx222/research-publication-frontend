@@ -23,13 +23,7 @@ const DepartmentCard = ({ department, onDelete }) => {
     <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200">
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center space-x-3">
-          <div
-            className={`w-12 h-12 rounded-xl flex items-center justify-center text-white font-semibold ${
-              department.isActive
-                ? "bg-gradient-to-r from-blue-500 to-purple-600"
-                : "bg-gray-400"
-            }`}
-          >
+          <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-semibold bg-gradient-to-r from-blue-500 to-purple-600">
             {department.code}
           </div>
           <div>
@@ -40,11 +34,12 @@ const DepartmentCard = ({ department, onDelete }) => {
           </div>
         </div>
         <div className="flex items-center space-x-2">
+          {/* Active Status Badge */}
           <span
-            className={`px-3 py-1 rounded-full text-xs font-medium ${
+            className={`px-2 py-1 text-xs font-medium rounded-full ${
               department.isActive
-                ? "bg-green-100 text-green-700"
-                : "bg-gray-100 text-gray-600"
+                ? "bg-green-100 text-green-800"
+                : "bg-red-100 text-red-800"
             }`}
           >
             {department.isActive ? "Active" : "Inactive"}
@@ -78,6 +73,11 @@ const DepartmentCard = ({ department, onDelete }) => {
           </div>
         </div>
       </div>
+
+      {/* Department ID (for reference) */}
+      <div className="mt-3 pt-3 border-t border-gray-50">
+        <p className="text-xs text-gray-400 font-mono">ID: {department._id}</p>
+      </div>
     </div>
   );
 };
@@ -89,7 +89,6 @@ const CreateDepartmentModal = ({ isOpen, onClose, onSubmit }) => {
     university: "",
     head: "",
     description: "",
-    isActive: true,
   });
   const [isLoading, setIsLoading] = useState(false);
 
@@ -125,7 +124,6 @@ const CreateDepartmentModal = ({ isOpen, onClose, onSubmit }) => {
         university: "",
         head: "",
         description: "",
-        isActive: true,
       });
     } catch (error) {
       console.error("Error creating department:", error);
@@ -136,10 +134,10 @@ const CreateDepartmentModal = ({ isOpen, onClose, onSubmit }) => {
   };
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : value,
+      [name]: value,
     }));
   };
 
@@ -244,24 +242,6 @@ const CreateDepartmentModal = ({ isOpen, onClose, onSubmit }) => {
             />
           </div>
 
-          <div className="flex items-center space-x-3">
-            <input
-              type="checkbox"
-              name="isActive"
-              id="isActive"
-              checked={formData.isActive}
-              onChange={handleChange}
-              disabled={isLoading}
-              className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 disabled:opacity-50"
-            />
-            <label
-              htmlFor="isActive"
-              className="text-sm font-medium text-gray-700"
-            >
-              Active Department
-            </label>
-          </div>
-
           <div className="flex space-x-3 pt-4">
             <button
               type="button"
@@ -286,165 +266,201 @@ const CreateDepartmentModal = ({ isOpen, onClose, onSubmit }) => {
 };
 
 const DepartmentDashboard = () => {
-  const [departments, setDepartments] = useState([]); // Changed: Empty array instead of mock data
+  const [departments, setDepartments] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [counts, setCounts] = useState({
-    total: 0,
-    active: 0,
-    inactive: 0,
-  });
-  const [isLoadingCounts, setIsLoadingCounts] = useState(true);
+  const [totalCount, setTotalCount] = useState(0);
+  const [isLoadingCount, setIsLoadingCount] = useState(true);
+  const [isLoadingDepartments, setIsLoadingDepartments] = useState(true);
 
-  // Fetch department counts on component mount
+  // Fetch departments and count on component mount
   useEffect(() => {
-    fetchDepartmentCounts();
+    fetchDepartments();
+    fetchDepartmentCount();
   }, []);
 
-  const fetchDepartmentCounts = async () => {
-    setIsLoadingCounts(true);
+  const fetchDepartments = async () => {
+    setIsLoadingDepartments(true);
     try {
-      const response = await fetch("http://localhost:3000/private-data/counts");
+      const response = await fetch(
+        "http://localhost:3000/api/private-data/departments"
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log("Departments data:", result);
+
+      // Updated to match your API response structure
+      if (result.success && result.data && Array.isArray(result.data)) {
+        setDepartments(result.data);
+      } else {
+        setDepartments([]);
+        console.warn("Unexpected API response structure:", result);
+      }
+    } catch (error) {
+      console.error("Error fetching departments:", error);
+      setDepartments([]);
+    } finally {
+      setIsLoadingDepartments(false);
+    }
+  };
+
+  const fetchDepartmentCount = async () => {
+    setIsLoadingCount(true);
+    try {
+      const response = await fetch(
+        "http://localhost:3000/api/private-data/counts"
+      );
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
-      console.log("Department counts:", data);
+      console.log("Department count:", data);
 
-      // Update counts based on the API response structure
-      setCounts({
-        total: data.total || 0,
-        active: data.active || 0,
-        inactive: data.inactive || 0,
-      });
+      // Update count based on the API response structure
+      setTotalCount(data.counts?.departments || departments.length || 0);
     } catch (error) {
-      console.error("Error fetching department counts:", error);
-      // Keep default counts if API fails
+      console.error("Error fetching department count:", error);
+      // Fallback to departments array length if count API fails
+      setTotalCount(departments.length);
     } finally {
-      setIsLoadingCounts(false);
+      setIsLoadingCount(false);
     }
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this department?")) {
-      setDepartments((prev) => prev.filter((dept) => dept._id !== id));
-      // Refresh counts after deletion
-      fetchDepartmentCounts();
+      try {
+        const response = await fetch(
+          `http://localhost:3000/api/department/${id}`,
+          {
+            method: "DELETE",
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        // Remove from local state
+        setDepartments((prev) => prev.filter((dept) => dept._id !== id));
+        // Refresh count after deletion
+        fetchDepartmentCount();
+
+        console.log("Department deleted successfully");
+      } catch (error) {
+        console.error("Error deleting department:", error);
+        alert("Failed to delete department. Please try again.");
+      }
     }
   };
 
-  const handleCreateDepartment = (newDepartment) => {
+  const handleCreateDepartment = (result) => {
     // Add the new department to local state
-    setDepartments((prev) => [newDepartment, ...prev]);
+    if (result.department) {
+      setDepartments((prev) => [result.department, ...prev]);
+    } else if (result.data) {
+      // Handle if the API returns data in 'data' property
+      setDepartments((prev) => [result.data, ...prev]);
+    }
     setIsModalOpen(false);
-    // Refresh counts after creation
-    fetchDepartmentCounts();
+    // Refresh count after creation
+    fetchDepartmentCount();
   };
 
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
       {/* Sidebar */}
       <Sidebar />
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Departments
-            </h1>
-            <p className="text-gray-600">Manage your university departments</p>
-          </div>
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white rounded-xl font-medium transition-all duration-200 shadow-lg hover:shadow-xl"
-          >
-            <Plus size={20} />
-            <span>New Department</span>
-          </button>
-        </div>
-
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                <Building2 className="text-blue-600" size={24} />
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Total Departments</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {isLoadingCounts ? "..." : counts.total}
-                </p>
-              </div>
+      <div className="flex-1 p-8">
+        <div className="max-w-7xl mx-auto">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                Departments
+              </h1>
+              <p className="text-gray-600">
+                Manage your university departments
+              </p>
             </div>
-          </div>
-
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
-                <Building2 className="text-green-600" size={24} />
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Active Departments</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {isLoadingCounts ? "..." : counts.active}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
-                <Building2 className="text-purple-600" size={24} />
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Inactive Departments</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {isLoadingCounts ? "..." : counts.inactive}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Departments Grid */}
-        {departments.length > 0 ? (
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-            {departments.map((department) => (
-              <DepartmentCard
-                key={department._id}
-                department={department}
-                onDelete={handleDelete}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="bg-white rounded-2xl p-12 text-center shadow-sm border border-gray-100">
-            <Building2 size={48} className="mx-auto text-gray-400 mb-4" />
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
-              No departments yet
-            </h3>
-            <p className="text-gray-600 mb-6">
-              Get started by creating your first department
-            </p>
             <button
               onClick={() => setIsModalOpen(true)}
-              className="inline-flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white rounded-xl font-medium transition-all duration-200"
+              className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white rounded-xl font-medium transition-all duration-200 shadow-lg hover:shadow-xl"
             >
               <Plus size={20} />
-              <span>Create Department</span>
+              <span>New Department</span>
             </button>
           </div>
-        )}
 
-        {/* Create Department Modal */}
-        <CreateDepartmentModal
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          onSubmit={handleCreateDepartment}
-        />
+          {/* Stats Card */}
+          <div className="mb-8">
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 max-w-sm">
+              <div className="flex items-center space-x-3">
+                <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                  <Building2 className="text-blue-600" size={24} />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Total Departments</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {isLoadingCount ? "..." : totalCount}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Loading State */}
+          {isLoadingDepartments ? (
+            <div className="bg-white rounded-2xl p-12 text-center shadow-sm border border-gray-100">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading departments...</p>
+            </div>
+          ) : (
+            <>
+              {/* Departments Grid */}
+              {departments.length > 0 ? (
+                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                  {departments.map((department) => (
+                    <DepartmentCard
+                      key={department._id}
+                      department={department}
+                      onDelete={handleDelete}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="bg-white rounded-2xl p-12 text-center shadow-sm border border-gray-100">
+                  <Building2 size={48} className="mx-auto text-gray-400 mb-4" />
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                    No departments yet
+                  </h3>
+                  <p className="text-gray-600 mb-6">
+                    Get started by creating your first department
+                  </p>
+                  <button
+                    onClick={() => setIsModalOpen(true)}
+                    className="inline-flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white rounded-xl font-medium transition-all duration-200"
+                  >
+                    <Plus size={20} />
+                    <span>Create Department</span>
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+
+          {/* Create Department Modal */}
+          <CreateDepartmentModal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            onSubmit={handleCreateDepartment}
+          />
+        </div>
       </div>
     </div>
   );
