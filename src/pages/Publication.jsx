@@ -1,11 +1,11 @@
 import React, { useState } from "react";
-
+//add appropriate ids
 const departments = [
   { id: "6855087c6db49ddcf8a3014e", name: "CSE" },
   { id: "6855087c6db49ddcf8a3014f", name: "Mechanical" },
   { id: "6855087c6db49ddcf8a30150", name: "Electrical" },
   { id: "6855087c6db49ddcf8a30151", name: "Civil" },
-  { id: "6855087c6db49ddcf8a30152", name: "Physics" }
+  { id: "6855087c6db49ddcf8a30152", name: "Physics" },
 ];
 
 export default function JournalRegistrationForm() {
@@ -30,8 +30,10 @@ export default function JournalRegistrationForm() {
     if (!form.employeeId) newErrors.employeeId = "Employee ID is required.";
     if (!form.password) newErrors.password = "Password is required.";
     if (!form.authorName) newErrors.authorName = "Author name is required.";
-    if (!form.authorDeptId) newErrors.authorDeptId = "Select author department.";
-    if (!form.journalDeptId) newErrors.journalDeptId = "Select journal department.";
+    if (!form.authorDeptId)
+      newErrors.authorDeptId = "Select author department.";
+    if (!form.journalDeptId)
+      newErrors.journalDeptId = "Select journal department.";
     if (!form.isbn) newErrors.isbn = "Journal ISBN is required.";
     if (!form.year) newErrors.year = "Year of publication is required.";
     if (!form.title) newErrors.title = "Title is required.";
@@ -76,7 +78,8 @@ export default function JournalRegistrationForm() {
         }),
       });
       const userData = await userRes.json();
-      if (!userRes.ok) throw new Error(userData.message || "User registration failed");
+      if (!userRes.ok)
+        throw new Error(userData.message || "User registration failed");
 
       const publicationData = new FormData();
       publicationData.append("title", form.title);
@@ -91,7 +94,8 @@ export default function JournalRegistrationForm() {
         body: publicationData,
       });
       const pubJson = await pubRes.json();
-      if (!pubRes.ok) throw new Error(pubJson.message || "Publication upload failed");
+      if (!pubRes.ok)
+        throw new Error(pubJson.message || "Publication upload failed");
       const publicationId = pubJson.publication._id;
 
       const authorRes = await fetch("http://localhost:3000/api/author", {
@@ -108,7 +112,8 @@ export default function JournalRegistrationForm() {
         }),
       });
       const authorJson = await authorRes.json();
-      if (!authorRes.ok) throw new Error(authorJson.message || "Main author save failed");
+      if (!authorRes.ok)
+        throw new Error(authorJson.message || "Main author save failed");
 
       for (let i = 0; i < form.coAuthors.length; i++) {
         const name = form.coAuthors[i];
@@ -126,7 +131,8 @@ export default function JournalRegistrationForm() {
           }),
         });
         const coJson = await coRes.json();
-        if (!coRes.ok) throw new Error(coJson.message || "Co-author save failed");
+        if (!coRes.ok)
+          throw new Error(coJson.message || "Co-author save failed");
       }
 
       alert("Publication and authors registered successfully!");
@@ -152,7 +158,9 @@ export default function JournalRegistrationForm() {
 
   return (
     <div className="max-w-2xl mx-auto p-6 bg-white shadow-md rounded-xl mt-10">
-      <h2 className="text-2xl font-semibold mb-6 text-center">Journal Publication Entry</h2>
+      <h2 className="text-2xl font-semibold mb-6 text-center">
+        Journal Publication Entry
+      </h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div>
@@ -164,7 +172,9 @@ export default function JournalRegistrationForm() {
               onChange={handleInputChange}
               className="w-full border rounded px-3 py-2"
             />
-            {errors.employeeId && <p className="text-red-500 text-sm">{errors.employeeId}</p>}
+            {errors.employeeId && (
+              <p className="text-red-500 text-sm">{errors.employeeId}</p>
+            )}
           </div>
           <div>
             <label className="block font-medium">Password</label>
@@ -175,7 +185,9 @@ export default function JournalRegistrationForm() {
               onChange={handleInputChange}
               className="w-full border rounded px-3 py-2"
             />
-            {errors.password && <p className="text-red-500 text-sm">{errors.password}</p>}
+            {errors.password && (
+              <p className="text-red-500 text-sm">{errors.password}</p>
+            )}
           </div>
         </div>
         <div>
@@ -187,7 +199,9 @@ export default function JournalRegistrationForm() {
             onChange={handleInputChange}
             className="w-full border rounded px-3 py-2"
           />
-          {errors.authorName && <p className="text-red-500 text-sm">{errors.authorName}</p>}
+          {errors.authorName && (
+            <p className="text-red-500 text-sm">{errors.authorName}</p>
+          )}
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
@@ -200,10 +214,14 @@ export default function JournalRegistrationForm() {
             >
               <option value="">Select</option>
               {departments.map((d) => (
-                <option key={d.id} value={d.id}>{d.name}</option>
+                <option key={d.id} value={d.id}>
+                  {d.name}
+                </option>
               ))}
             </select>
-            {errors.authorDeptId && <p className="text-red-500 text-sm">{errors.authorDeptId}</p>}
+            {errors.authorDeptId && (
+              <p className="text-red-500 text-sm">{errors.authorDeptId}</p>
+            )}
           </div>
           <div>
             <label className="block font-medium">Journal Department</label>
@@ -215,10 +233,14 @@ export default function JournalRegistrationForm() {
             >
               <option value="">Select</option>
               {departments.map((d) => (
-                <option key={d.id} value={d.id}>{d.name}</option>
+                <option key={d.id} value={d.id}>
+                  {d.name}
+                </option>
               ))}
             </select>
-            {errors.journalDeptId && <p className="text-red-500 text-sm">{errors.journalDeptId}</p>}
+            {errors.journalDeptId && (
+              <p className="text-red-500 text-sm">{errors.journalDeptId}</p>
+            )}
           </div>
         </div>
         <div>
@@ -252,7 +274,9 @@ export default function JournalRegistrationForm() {
             className="w-full border rounded px-3 py-2"
             placeholder="Enter journal title"
           />
-          {errors.title && <p className="text-red-500 text-sm">{errors.title}</p>}
+          {errors.title && (
+            <p className="text-red-500 text-sm">{errors.title}</p>
+          )}
         </div>
         <div>
           <label className="block font-medium">Upload PDF</label>
@@ -271,11 +295,17 @@ export default function JournalRegistrationForm() {
               type="text"
               name="coAuthorInput"
               value={form.coAuthorInput}
-              onChange={(e) => setForm({ ...form, coAuthorInput: e.target.value })}
+              onChange={(e) =>
+                setForm({ ...form, coAuthorInput: e.target.value })
+              }
               className="w-full border rounded px-3 py-2"
               placeholder="Enter co-author name"
             />
-            <button type="button" onClick={handleAddCoAuthor} className="bg-blue-500 text-white px-3 py-2 rounded">
+            <button
+              type="button"
+              onClick={handleAddCoAuthor}
+              className="bg-blue-500 text-white px-3 py-2 rounded"
+            >
               Add
             </button>
           </div>
@@ -286,7 +316,10 @@ export default function JournalRegistrationForm() {
           </ul>
         </div>
         <div className="text-center">
-          <button type="submit" className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700">
+          <button
+            type="submit"
+            className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700"
+          >
             Add Publication
           </button>
         </div>

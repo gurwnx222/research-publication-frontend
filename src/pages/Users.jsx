@@ -1,3 +1,4 @@
+import React from "react";
 import { useState, useEffect } from "react";
 import Sidebar from "../components/Sidebar";
 import DashboardHeader from "../components/ui/DashboardHeader";
@@ -5,12 +6,14 @@ import SearchBar from "../components/SearchBar";
 import UsersGrid from "../components/ui/UsersGrid";
 import CreateUserModal from "../components/CreateUserModal";
 import CreateAdminModal from "../components/CreateAdminModal";
+import CreateAuthorModal from "../components/CreateAuthorModal";
 import StatsCard from "../components/StatsCard";
 import "../App.css";
 import {
   Users as UsersIcon,
   Building2 as DepartmentIcon,
   Shield as AdminIcon,
+  PenTool as AuthorIcon,
 } from "lucide-react";
 
 export default function Users() {
@@ -37,6 +40,7 @@ export default function Users() {
   // Modal state
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isCreateAdminModalOpen, setIsCreateAdminModalOpen] = useState(false);
+  const [isCreateAuthorModalOpen, setIsCreateAuthorModalOpen] = useState(false);
 
   // Fetch stats data
   useEffect(() => {
@@ -158,6 +162,11 @@ export default function Users() {
     setIsCreateAdminModalOpen(true);
   };
 
+  // Handle create author
+  const handleCreateAuthor = () => {
+    setIsCreateAuthorModalOpen(true);
+  };
+
   // Handle modal close
   const handleModalClose = () => {
     setIsCreateModalOpen(false);
@@ -166,6 +175,11 @@ export default function Users() {
   // Handle admin modal close
   const handleAdminModalClose = () => {
     setIsCreateAdminModalOpen(false);
+  };
+
+  // Handle author modal close
+  const handleAuthorModalClose = () => {
+    setIsCreateAuthorModalOpen(false);
   };
 
   // Handle user creation submit
@@ -223,6 +237,34 @@ export default function Users() {
     }
   };
 
+  // Handle author creation submit
+  const handleAuthorSubmit = async (authorData) => {
+    try {
+      const response = await fetch(`${BASE_URL}/register/author`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(authorData),
+      });
+      console.log("Creating author with data:", authorData);
+      if (response.ok) {
+        // Close modal and refresh data
+        setIsCreateAuthorModalOpen(false);
+        fetchUsers(pagination.currentPage, searchTerm);
+        // Refresh stats
+        const statsResponse = await fetch(`${BASE_URL}/private-data/counts`);
+        if (statsResponse.ok) {
+          const stats = await statsResponse.json();
+          setTotalUsers(stats?.counts?.users || 0);
+          setTotalAuthors(stats?.counts?.authors || 0);
+        }
+      }
+    } catch (error) {
+      console.error("Error creating author:", error);
+    }
+  };
+
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
       {/* Sidebar */}
@@ -234,6 +276,7 @@ export default function Users() {
         <DashboardHeader
           onCreateUser={handleCreateUser}
           onCreateAdmin={handleCreateAdmin}
+          onCreateAuthor={handleCreateAuthor}
         />
 
         {/* Search Bar */}
@@ -251,7 +294,7 @@ export default function Users() {
             title="Total Authors"
             count={totalAuthors}
             iconColor="text-green-500"
-            icon={UsersIcon}
+            icon={AuthorIcon}
           />
           <StatsCard
             title="Total Departments"
@@ -278,6 +321,7 @@ export default function Users() {
             onPageChange={handlePageChange}
             onCreateUser={handleCreateUser}
             onCreateAdmin={handleCreateAdmin}
+            onCreateAuthor={handleCreateAuthor}
           />
         </main>
       </div>
@@ -294,6 +338,13 @@ export default function Users() {
         isOpen={isCreateAdminModalOpen}
         onClose={handleAdminModalClose}
         onSubmit={handleAdminSubmit}
+      />
+
+      {/* Create Author Modal */}
+      <CreateAuthorModal
+        isOpen={isCreateAuthorModalOpen}
+        onClose={handleAuthorModalClose}
+        onSubmit={handleAuthorSubmit}
       />
     </div>
   );

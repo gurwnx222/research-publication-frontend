@@ -99,13 +99,16 @@ const CreateDepartmentModal = ({ isOpen, onClose, onSubmit }) => {
     setIsLoading(true);
 
     try {
-      const response = await fetch("http://localhost:3000/api/department", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
+      const response = await fetch(
+        "http://localhost:3000/api/register/department",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        }
+      );
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
