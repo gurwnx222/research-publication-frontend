@@ -254,7 +254,7 @@ export default function AdminLogin() {
 
         {/* Contact Modal */}
         {showContact && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="fixed inset-0 bg-gray-900 bg-opacity-40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 relative">
               <button
                 onClick={() => setShowContact(false)}
@@ -287,7 +287,7 @@ export default function AdminLogin() {
                       href="tel:+917973814865"
                       className="text-blue-600 hover:text-blue-700 font-medium"
                     >
-                      +91 79738-14865
+                      +91 7973814865
                     </a>
                   </div>
                 </div>
@@ -341,7 +341,9 @@ export default function AdminLogin() {
 
         {/* Additional Info */}
         <div className="mt-8 text-center">
-          <p className="text-xs text-gray-500">Protected by RIMT IT security</p>
+          <p className="text-xs text-gray-500">
+            Protected by enterprise-grade security
+          </p>
         </div>
       </div>
     </div>
