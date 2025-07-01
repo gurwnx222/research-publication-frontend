@@ -5,25 +5,15 @@ import DashboardHeader from "../components/ui/DashboardHeader";
 import SearchBar from "../components/SearchBar";
 import UsersGrid from "../components/ui/UsersGrid";
 import CreateUserModal from "../components/CreateUserModal";
-import CreateAdminModal from "../components/CreateAdminModal";
-import CreateAuthorModal from "../components/CreateAuthorModal";
 import StatsCard from "../components/StatsCard";
 import "../App.css";
-import {
-  Users as UsersIcon,
-  Building2 as DepartmentIcon,
-  Shield as AdminIcon,
-  PenTool as AuthorIcon,
-} from "lucide-react";
+import { Users as UsersIcon } from "lucide-react";
 
 export default function Users() {
   const BASE_URL = "http://localhost:3000/api";
 
   // Stats state
   const [totalUsers, setTotalUsers] = useState(0);
-  const [totalAuthors, setTotalAuthors] = useState(0);
-  const [totalDepartments, setTotalDepartments] = useState(0);
-  const [totalAdmins, setTotalAdmins] = useState(0);
 
   // Users and pagination state
   const [users, setUsers] = useState([]);
@@ -37,10 +27,31 @@ export default function Users() {
     totalUsers: 0,
   });
 
-  // Modal state
+  // Modal state - only for user creation
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [isCreateAdminModalOpen, setIsCreateAdminModalOpen] = useState(false);
-  const [isCreateAuthorModalOpen, setIsCreateAuthorModalOpen] = useState(false);
+
+  // New state for departments only
+  const [departments, setDepartments] = useState([]);
+
+  // Fetch departments
+  useEffect(() => {
+    const fetchDepartments = async () => {
+      try {
+        // Fetch departments
+        const deptResponse = await fetch(
+          `${BASE_URL}/private-data/departments`
+        );
+        if (deptResponse.ok) {
+          const deptData = await deptResponse.json();
+          setDepartments(deptData.data?.departments || deptData || []);
+        }
+      } catch (error) {
+        console.error("Error fetching departments:", error);
+      }
+    };
+
+    fetchDepartments();
+  }, []);
 
   // Fetch stats data
   useEffect(() => {
@@ -53,9 +64,6 @@ export default function Users() {
         const stats = await statsResponse.json();
 
         setTotalUsers(stats?.counts?.users || 0);
-        setTotalAuthors(stats?.counts?.authors || 0);
-        setTotalDepartments(stats?.counts?.departments || 0);
-        setTotalAdmins(stats?.counts?.admins || 0);
       } catch (error) {
         console.error("Error fetching stats:", error);
       }
@@ -157,29 +165,9 @@ export default function Users() {
     setIsCreateModalOpen(true);
   };
 
-  // Handle create admin
-  const handleCreateAdmin = () => {
-    setIsCreateAdminModalOpen(true);
-  };
-
-  // Handle create author
-  const handleCreateAuthor = () => {
-    setIsCreateAuthorModalOpen(true);
-  };
-
   // Handle modal close
   const handleModalClose = () => {
     setIsCreateModalOpen(false);
-  };
-
-  // Handle admin modal close
-  const handleAdminModalClose = () => {
-    setIsCreateAdminModalOpen(false);
-  };
-
-  // Handle author modal close
-  const handleAuthorModalClose = () => {
-    setIsCreateAuthorModalOpen(false);
   };
 
   // Handle user creation submit
@@ -209,62 +197,6 @@ export default function Users() {
     }
   };
 
-  // Handle admin creation submit
-  const handleAdminSubmit = async (adminData) => {
-    try {
-      const response = await fetch(`${BASE_URL}/admin/register`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(adminData),
-      });
-      console.log("Creating admin with data:", adminData);
-      if (response.ok) {
-        // Close modal and refresh data
-        setIsCreateAdminModalOpen(false);
-        fetchUsers(pagination.currentPage, searchTerm);
-        // Refresh stats
-        const statsResponse = await fetch(`${BASE_URL}/private-data/counts`);
-        if (statsResponse.ok) {
-          const stats = await statsResponse.json();
-          setTotalUsers(stats?.counts?.users || 0);
-          setTotalAdmins(stats?.counts?.admins || 0);
-        }
-      }
-    } catch (error) {
-      console.error("Error creating admin:", error);
-    }
-  };
-
-  // Handle author creation submit
-  const handleAuthorSubmit = async (authorData) => {
-    try {
-      const response = await fetch(`${BASE_URL}/register/author`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(authorData),
-      });
-      console.log("Creating author with data:", authorData);
-      if (response.ok) {
-        // Close modal and refresh data
-        setIsCreateAuthorModalOpen(false);
-        fetchUsers(pagination.currentPage, searchTerm);
-        // Refresh stats
-        const statsResponse = await fetch(`${BASE_URL}/private-data/counts`);
-        if (statsResponse.ok) {
-          const stats = await statsResponse.json();
-          setTotalUsers(stats?.counts?.users || 0);
-          setTotalAuthors(stats?.counts?.authors || 0);
-        }
-      }
-    } catch (error) {
-      console.error("Error creating author:", error);
-    }
-  };
-
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
       {/* Sidebar */}
@@ -273,11 +205,7 @@ export default function Users() {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col lg:ml-0">
         {/* Header */}
-        <DashboardHeader
-          onCreateUser={handleCreateUser}
-          onCreateAdmin={handleCreateAdmin}
-          onCreateAuthor={handleCreateAuthor}
-        />
+        <DashboardHeader onCreateUser={handleCreateUser} />
 
         {/* Search Bar */}
         <div className="px-6">
@@ -290,24 +218,6 @@ export default function Users() {
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 px-6">
           <StatsCard title="Total Users" count={totalUsers} icon={UsersIcon} />
-          <StatsCard
-            title="Total Authors"
-            count={totalAuthors}
-            iconColor="text-green-500"
-            icon={AuthorIcon}
-          />
-          <StatsCard
-            title="Total Departments"
-            count={totalDepartments}
-            iconColor="text-blue-400"
-            icon={DepartmentIcon}
-          />
-          <StatsCard
-            title="Total Admins"
-            count={totalAdmins}
-            iconColor="text-purple-500"
-            icon={AdminIcon}
-          />
         </div>
 
         {/* Users Grid */}
@@ -320,8 +230,6 @@ export default function Users() {
             onDelete={handleDeleteUser}
             onPageChange={handlePageChange}
             onCreateUser={handleCreateUser}
-            onCreateAdmin={handleCreateAdmin}
-            onCreateAuthor={handleCreateAuthor}
           />
         </main>
       </div>
@@ -331,20 +239,6 @@ export default function Users() {
         isOpen={isCreateModalOpen}
         onClose={handleModalClose}
         onSubmit={handleUserSubmit}
-      />
-
-      {/* Create Admin Modal */}
-      <CreateAdminModal
-        isOpen={isCreateAdminModalOpen}
-        onClose={handleAdminModalClose}
-        onSubmit={handleAdminSubmit}
-      />
-
-      {/* Create Author Modal */}
-      <CreateAuthorModal
-        isOpen={isCreateAuthorModalOpen}
-        onClose={handleAuthorModalClose}
-        onSubmit={handleAuthorSubmit}
       />
     </div>
   );

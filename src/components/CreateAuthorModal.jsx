@@ -1,19 +1,13 @@
 import React, { useState } from "react";
 import { X, PenTool, BookOpen } from "lucide-react";
 
-const CreateAuthorModal = ({
-  isOpen,
-  onClose,
-  onSubmit,
-  departments = [],
-  publications = [],
-}) => {
+const CreateAuthorModal = ({ isOpen, onClose, onSubmit, departments = [] }) => {
   const [formData, setFormData] = useState({
     employee_id: "",
     author_name: "",
     email: "",
     department: "",
-    publication_id: "",
+    publication_title: "", // Changed from publication_id to publication_title
     author_order: 1,
   });
 
@@ -37,7 +31,7 @@ const CreateAuthorModal = ({
         author_name: "",
         email: "",
         department: "",
-        publication_id: "",
+        publication_title: "",
         author_order: 1,
       });
     } finally {
@@ -182,24 +176,20 @@ const CreateAuthorModal = ({
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Publication *
+                Publication Title *
               </label>
-              <select
-                name="publication_id"
-                value={formData.publication_id}
+              <input
+                type="text"
+                name="publication_title"
+                value={formData.publication_title}
                 onChange={handleChange}
                 required
+                maxLength={200}
                 className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
-              >
-                <option value="">Select a publication</option>
-                {publications.map((pub) => (
-                  <option key={pub._id || pub.id} value={pub._id || pub.id}>
-                    {pub.title || pub.publication_title}
-                  </option>
-                ))}
-              </select>
+                placeholder="e.g., Research Paper Title"
+              />
               <p className="mt-1 text-xs text-gray-500">
-                Reference to Publication collection
+                Enter the publication title directly
               </p>
             </div>
           </div>
@@ -213,9 +203,8 @@ const CreateAuthorModal = ({
                 </h4>
                 <p className="text-xs text-blue-600 mt-1">
                   This form creates an author entry linked to a specific
-                  publication and department. Each author has an order (1 for
-                  primary author) and email is only required for the primary
-                  author.
+                  department. Each author has an order (1 for primary author)
+                  and email is only required for the primary author.
                 </p>
               </div>
             </div>
