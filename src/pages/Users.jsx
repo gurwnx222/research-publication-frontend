@@ -1,13 +1,17 @@
-import React from "react";
 import { useState, useEffect } from "react";
 import Sidebar from "../components/Sidebar";
 import DashboardHeader from "../components/ui/DashboardHeader";
 import SearchBar from "../components/SearchBar";
 import UsersGrid from "../components/ui/UsersGrid";
 import CreateUserModal from "../components/CreateUserModal";
+import CreateAdminModal from "../components/CreateAdminModal";
 import StatsCard from "../components/StatsCard";
 import "../App.css";
-import { Users as UsersIcon, Building2 as DepartmentIcon } from "lucide-react";
+import {
+  Users as UsersIcon,
+  Building2 as DepartmentIcon,
+  Shield as AdminIcon,
+} from "lucide-react";
 
 export default function Users() {
   const BASE_URL = "http://localhost:3000/api";
@@ -16,6 +20,7 @@ export default function Users() {
   const [totalUsers, setTotalUsers] = useState(0);
   const [totalAuthors, setTotalAuthors] = useState(0);
   const [totalDepartments, setTotalDepartments] = useState(0);
+  const [totalAdmins, setTotalAdmins] = useState(0);
 
   // Users and pagination state
   const [users, setUsers] = useState([]);
@@ -31,6 +36,7 @@ export default function Users() {
 
   // Modal state
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isCreateAdminModalOpen, setIsCreateAdminModalOpen] = useState(false);
 
   // Fetch stats data
   useEffect(() => {
@@ -45,6 +51,7 @@ export default function Users() {
         setTotalUsers(stats?.counts?.users || 0);
         setTotalAuthors(stats?.counts?.authors || 0);
         setTotalDepartments(stats?.counts?.departments || 0);
+        setTotalAdmins(stats?.counts?.admins || 0);
       } catch (error) {
         console.error("Error fetching stats:", error);
       }
@@ -146,9 +153,19 @@ export default function Users() {
     setIsCreateModalOpen(true);
   };
 
+  // Handle create admin
+  const handleCreateAdmin = () => {
+    setIsCreateAdminModalOpen(true);
+  };
+
   // Handle modal close
   const handleModalClose = () => {
     setIsCreateModalOpen(false);
+  };
+
+  // Handle admin modal close
+  const handleAdminModalClose = () => {
+    setIsCreateAdminModalOpen(false);
   };
 
   // Handle user creation submit
@@ -178,6 +195,34 @@ export default function Users() {
     }
   };
 
+  // Handle admin creation submit
+  const handleAdminSubmit = async (adminData) => {
+    try {
+      const response = await fetch(`${BASE_URL}/admin/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(adminData),
+      });
+      console.log("Creating admin with data:", adminData);
+      if (response.ok) {
+        // Close modal and refresh data
+        setIsCreateAdminModalOpen(false);
+        fetchUsers(pagination.currentPage, searchTerm);
+        // Refresh stats
+        const statsResponse = await fetch(`${BASE_URL}/private-data/counts`);
+        if (statsResponse.ok) {
+          const stats = await statsResponse.json();
+          setTotalUsers(stats?.counts?.users || 0);
+          setTotalAdmins(stats?.counts?.admins || 0);
+        }
+      }
+    } catch (error) {
+      console.error("Error creating admin:", error);
+    }
+  };
+
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
       {/* Sidebar */}
@@ -186,7 +231,10 @@ export default function Users() {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col lg:ml-0">
         {/* Header */}
-        <DashboardHeader onCreateUser={handleCreateUser} />
+        <DashboardHeader
+          onCreateUser={handleCreateUser}
+          onCreateAdmin={handleCreateAdmin}
+        />
 
         {/* Search Bar */}
         <div className="px-6">
@@ -197,7 +245,7 @@ export default function Users() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 px-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 px-6">
           <StatsCard title="Total Users" count={totalUsers} icon={UsersIcon} />
           <StatsCard
             title="Total Authors"
@@ -211,6 +259,12 @@ export default function Users() {
             iconColor="text-blue-400"
             icon={DepartmentIcon}
           />
+          <StatsCard
+            title="Total Admins"
+            count={totalAdmins}
+            iconColor="text-purple-500"
+            icon={AdminIcon}
+          />
         </div>
 
         {/* Users Grid */}
@@ -223,6 +277,7 @@ export default function Users() {
             onDelete={handleDeleteUser}
             onPageChange={handlePageChange}
             onCreateUser={handleCreateUser}
+            onCreateAdmin={handleCreateAdmin}
           />
         </main>
       </div>
@@ -232,6 +287,13 @@ export default function Users() {
         isOpen={isCreateModalOpen}
         onClose={handleModalClose}
         onSubmit={handleUserSubmit}
+      />
+
+      {/* Create Admin Modal */}
+      <CreateAdminModal
+        isOpen={isCreateAdminModalOpen}
+        onClose={handleAdminModalClose}
+        onSubmit={handleAdminSubmit}
       />
     </div>
   );

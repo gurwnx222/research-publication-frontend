@@ -19,7 +19,6 @@ const CreateUserModal = ({ isOpen, onClose, onSubmit }) => {
     "Assistant Professor",
     "Lecturer",
     "Researcher",
-    "admin",
     "Technical Staff",
   ];
 

@@ -9,18 +9,31 @@ import {
   Phone,
   Instagram,
   X,
+  ChevronDown,
+  UserCog,
 } from "lucide-react";
 
 export default function AdminLogin() {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
+    role: "",
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [showRoleDropdown, setShowRoleDropdown] = useState(false);
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loginSuccess, setLoginSuccess] = useState(false);
   const [showContact, setShowContact] = useState(false);
+
+  const roles = [
+    {
+      value: "superadmin",
+      label: "Super Admin",
+      description: "Full system access",
+    },
+    { value: "admin", label: "Admin", description: "Standard admin access" },
+  ];
 
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -40,6 +53,10 @@ export default function AdminLogin() {
       newErrors.password = "Password is required";
     } else if (formData.password.length < 6) {
       newErrors.password = "Password must be at least 6 characters";
+    }
+
+    if (!formData.role) {
+      newErrors.role = "Please select a role";
     }
 
     setErrors(newErrors);
@@ -62,6 +79,22 @@ export default function AdminLogin() {
     }
   };
 
+  const handleRoleSelect = (roleValue) => {
+    setFormData((prev) => ({
+      ...prev,
+      role: roleValue,
+    }));
+    setShowRoleDropdown(false);
+
+    // Clear role error if exists
+    if (errors.role) {
+      setErrors((prev) => ({
+        ...prev,
+        role: "",
+      }));
+    }
+  };
+
   const handleSubmit = async () => {
     if (!validateForm()) {
       return;
@@ -69,20 +102,48 @@ export default function AdminLogin() {
 
     setIsSubmitting(true);
 
-    // Simulate API call
-    setTimeout(() => {
-      // For demo purposes, accept any valid email/password combination
-      console.log("Login attempt:", formData);
-      setLoginSuccess(true);
-      setIsSubmitting(false);
+    try {
+      const response = await fetch("http://localhost:3000/api/admin/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+          role: formData.role,
+        }),
+      });
 
-      // Reset success message after 3 seconds
-      setTimeout(() => {
-        setLoginSuccess(false);
-        setFormData({ email: "", password: "" });
-      }, 3000);
-    }, 1500);
+      const data = await response.json();
+
+      if (response.ok) {
+        console.log("Login successful:", data);
+        setLoginSuccess(true);
+
+        // Reset success message and form after 3 seconds
+        setTimeout(() => {
+          setLoginSuccess(false);
+          setFormData({ email: "", password: "", role: "" });
+        }, 3000);
+      } else {
+        // Handle server errors
+        setErrors({
+          submit:
+            data.message || "Login failed. Please check your credentials.",
+        });
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      setErrors({
+        submit: "Network error. Please check your connection and try again.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
+  const selectedRole = roles.find((role) => role.value === formData.role);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
@@ -108,6 +169,13 @@ export default function AdminLogin() {
               <span className="text-green-800 font-medium">
                 Login successful! Welcome back.
               </span>
+            </div>
+          )}
+
+          {errors.submit && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3">
+              <AlertCircle className="w-5 h-5 text-red-600" />
+              <span className="text-red-800 font-medium">{errors.submit}</span>
             </div>
           )}
 
@@ -190,6 +258,67 @@ export default function AdminLogin() {
                 <div className="flex items-center gap-2 text-sm text-red-600">
                   <AlertCircle className="w-4 h-4" />
                   <span>{errors.password}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Role Selection */}
+            <div className="space-y-2">
+              <label className="block text-sm font-semibold text-gray-700">
+                Select Role
+              </label>
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setShowRoleDropdown(!showRoleDropdown)}
+                  disabled={isSubmitting}
+                  className={`w-full flex items-center justify-between pl-10 pr-3 py-3 border rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${
+                    errors.role
+                      ? "border-red-300 bg-red-50"
+                      : "border-gray-300 bg-gray-50 hover:bg-white focus:bg-white"
+                  }`}
+                >
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <UserCog className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <span
+                    className={`text-left ${
+                      selectedRole ? "text-gray-900" : "text-gray-400"
+                    }`}
+                  >
+                    {selectedRole ? selectedRole.label : "Select your role"}
+                  </span>
+                  <ChevronDown
+                    className={`h-5 w-5 text-gray-400 transition-transform ${
+                      showRoleDropdown ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+
+                {showRoleDropdown && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg">
+                    {roles.map((role) => (
+                      <button
+                        key={role.value}
+                        type="button"
+                        onClick={() => handleRoleSelect(role.value)}
+                        className="w-full px-4 py-3 text-left hover:bg-gray-50 focus:bg-gray-50 focus:outline-none first:rounded-t-xl last:rounded-b-xl transition-colors"
+                      >
+                        <div className="font-medium text-gray-900">
+                          {role.label}
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          {role.description}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+              {errors.role && (
+                <div className="flex items-center gap-2 text-sm text-red-600">
+                  <AlertCircle className="w-4 h-4" />
+                  <span>{errors.role}</span>
                 </div>
               )}
             </div>
@@ -287,7 +416,7 @@ export default function AdminLogin() {
                       href="tel:+917973814865"
                       className="text-blue-600 hover:text-blue-700 font-medium"
                     >
-                      +91 7973814865
+                      +91 79738-14865
                     </a>
                   </div>
                 </div>

@@ -1,29 +1,25 @@
-import React, { useState } from 'react';
-import { Home, User, Building, X } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from "react";
+import { Home, User, Building, X, LogOut } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 /**
  * Sidebar Navigation Component
- * 
+ *
  * @param {boolean} isOpen - Controls sidebar visibility on mobile
  * @param {function} onClose - Callback function to close sidebar
  * @param {string} activeTab - Currently active tab/page
  * @param {function} onTabChange - Callback function when tab changes
  */
-const Sidebar = ({ 
-  isOpen, 
-  onClose, 
-  activeTab = 'dashboard', 
-  onTabChange 
-}) => {
+const Sidebar = ({ isOpen, onClose, activeTab = "dashboard", onTabChange }) => {
   const navigate = useNavigate();
   const [currentTab, setCurrentTab] = useState(activeTab);
-  
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
   // Menu items configuration
   const menuItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: Home },
-    { id: 'users', label: 'Users', icon: User },
-    { id: 'departments', label: 'Departments', icon: Building }
+    { id: "dashboard", label: "Dashboard", icon: Home },
+    { id: "users", label: "Users", icon: User },
+    { id: "departments", label: "Departments", icon: Building },
   ];
 
   const handleTabClick = (tabId) => {
@@ -31,9 +27,9 @@ const Sidebar = ({
     if (onTabChange) onTabChange(tabId);
 
     const pathMap = {
-      dashboard: '/dashboard',
-      departments: '/department',
-      users: '/users',
+      dashboard: "/dashboard",
+      departments: "/department",
+      users: "/users",
     };
 
     const target = pathMap[tabId];
@@ -44,6 +40,36 @@ const Sidebar = ({
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      setIsLoggingOut(true);
+
+      const response = await fetch("http://localhost:3000/api/admin/logout", {
+        method: "POST",
+        credentials: "include", // Include cookies for session management
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        // Clear any local storage or session storage if needed
+        localStorage.clear();
+        sessionStorage.clear();
+
+        // Redirect to login page or home
+        navigate("/login");
+      } else {
+        console.error("Logout failed");
+        // You can add error handling here (toast notification, etc.)
+      }
+    } catch (error) {
+      console.error("Error during logout:", error);
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
+
   // Menu item component
   const MenuItem = ({ item }) => (
     <li key={item.id}>
@@ -51,9 +77,10 @@ const Sidebar = ({
         onClick={() => handleTabClick(item.id)}
         className={`
           w-full flex items-center px-4 py-3 rounded-lg transition-all duration-200 text-left
-          ${currentTab === item.id 
-            ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg transform scale-105' 
-            : 'text-gray-700 hover:bg-gray-50 hover:shadow-md hover:transform hover:scale-102'
+          ${
+            currentTab === item.id
+              ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg transform scale-105"
+              : "text-gray-700 hover:bg-gray-50 hover:shadow-md hover:transform hover:scale-102"
           }
         `}
       >
@@ -67,19 +94,25 @@ const Sidebar = ({
     <>
       {/* Mobile Overlay */}
       {isOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
           onClick={onClose}
         />
       )}
-      
+
       {/* Sidebar Container - Centered on Left Side */}
-      <div className={`
-        fixed left-4 top-1/2 transform -translate-y-1/2 w-72 bg-white rounded-2xl shadow-2xl z-50 transition-all duration-300 ease-in-out border border-gray-100
+      <div
+        className={`
+        fixed left-4 top-1/2 transform -translate-y-1/2 w-72 bg-white rounded-2xl shadow-2xl z-50 transition-all duration-300 ease-in-out border border-gray-100 flex flex-col
         lg:relative lg:left-0 lg:top-0 lg:transform-none lg:translate-y-0 lg:shadow-xl
-        ${isOpen ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0 lg:translate-x-0 lg:opacity-100'}
+        ${
+          isOpen
+            ? "translate-x-0 opacity-100"
+            : "-translate-x-full opacity-0 lg:translate-x-0 lg:opacity-100"
+        }
         max-h-[80vh] lg:max-h-full overflow-hidden
-      `}>
+      `}
+      >
         {/* Card Header with Gradient Background */}
         <div className="p-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-t-2xl border-b border-gray-100">
           <div className="flex items-center justify-between">
@@ -89,7 +122,7 @@ const Sidebar = ({
               </h2>
               <p className="text-sm text-gray-500 mt-1">Navigation Panel</p>
             </div>
-            <button 
+            <button
               onClick={onClose}
               className="lg:hidden p-2 rounded-full hover:bg-white/50 transition-colors"
             >
@@ -97,7 +130,7 @@ const Sidebar = ({
             </button>
           </div>
         </div>
-        
+
         {/* Navigation Menu */}
         <nav className="p-6 flex-1 overflow-y-auto">
           <ul className="space-y-3">
@@ -106,6 +139,27 @@ const Sidebar = ({
             ))}
           </ul>
         </nav>
+
+        {/* Logout Section */}
+        <div className="p-6 border-t border-gray-100">
+          <button
+            onClick={handleLogout}
+            disabled={isLoggingOut}
+            className={`
+              w-full flex items-center px-4 py-3 rounded-lg transition-all duration-200 text-left
+              ${
+                isLoggingOut
+                  ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                  : "bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white shadow-lg hover:shadow-xl transform hover:scale-105"
+              }
+            `}
+          >
+            <LogOut
+              className={`w-5 h-5 mr-3 ${isLoggingOut ? "animate-spin" : ""}`}
+            />
+            {isLoggingOut ? "Logging out..." : "Logout"}
+          </button>
+        </div>
 
         {/* Card Footer */}
         <div className="p-4 border-t border-gray-100 bg-gray-50 rounded-b-2xl">
