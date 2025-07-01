@@ -2,6 +2,9 @@ import React from "react";
 import { Trash2, User, Mail, Badge, Calendar } from "lucide-react";
 
 const UserCard = ({ user, onDelete }) => {
+  // Fetch user list from the API
+  const BASE_URL = "http://localhost:3000/api";
+
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
