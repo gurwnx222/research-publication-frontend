@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from '../context/AuthContext'; // Adjust path as needed
 import {
   Eye,
   EyeOff,
@@ -25,6 +27,18 @@ export default function AdminLogin() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loginSuccess, setLoginSuccess] = useState(false);
   const [showContact, setShowContact] = useState(false);
+
+  const { login, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      const from = location.state?.from?.pathname || '/dashboard';
+      navigate(from, { replace: true });
+    }
+  }, [isAuthenticated, navigate, location]);
 
   const roles = [
     {
@@ -103,40 +117,27 @@ export default function AdminLogin() {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch("http://localhost:3000/api/admin/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-          role: formData.role,
-        }),
-      });
-      console.log("response: ", response);
-      const data = await response.json();
+      const result = await login(formData.email, formData.password, formData.role);
 
-      if (response.ok) {
-        console.log("Login successful:", data);
+      if (result.success) {
+        console.log("Login successful:", result.data);
         setLoginSuccess(true);
 
-        // Reset success message and form after 3 seconds
+        // Show success message briefly then redirect
         setTimeout(() => {
-          setLoginSuccess(false);
-          setFormData({ email: "", password: "", role: "" });
-        }, 3000);
+          const from = location.state?.from?.pathname || '/dashboard';
+          navigate(from, { replace: true });
+        }, 1500);
       } else {
-        // Handle server errors
+        // Handle login errors
         setErrors({
-          submit:
-            data.message || "Login failed. Please check your credentials.",
+          submit: result.error,
         });
       }
     } catch (error) {
       console.error("Login error:", error);
       setErrors({
-        submit: "Network error. Please check your connection and try again.",
+        submit: "An unexpected error occurred. Please try again.",
       });
     } finally {
       setIsSubmitting(false);
@@ -167,7 +168,7 @@ export default function AdminLogin() {
             <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl flex items-center gap-3">
               <CheckCircle className="w-5 h-5 text-green-600" />
               <span className="text-green-800 font-medium">
-                Login successful! Welcome back.
+                Login successful! Redirecting...
               </span>
             </div>
           )}
