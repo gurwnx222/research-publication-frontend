@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Home, User, Building, X, LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from '../context/AuthContext'; // Adjust path as needed
 
 /**
  * Sidebar Navigation Component
@@ -12,6 +13,7 @@ import { useNavigate } from "react-router-dom";
  */
 const Sidebar = ({ isOpen, onClose, activeTab = "dashboard", onTabChange }) => {
   const navigate = useNavigate();
+  const { logout } = useAuth();
   const [currentTab, setCurrentTab] = useState(activeTab);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
@@ -43,28 +45,11 @@ const Sidebar = ({ isOpen, onClose, activeTab = "dashboard", onTabChange }) => {
   const handleLogout = async () => {
     try {
       setIsLoggingOut(true);
-
-      const response = await fetch("http://localhost:3000/api/admin/logout", {
-        method: "POST",
-        credentials: "include", // Include cookies for session management
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (response.ok) {
-        // Clear any local storage or session storage if needed
-        localStorage.clear();
-        sessionStorage.clear();
-
-        // Redirect to login page or home
-        navigate("/login");
-      } else {
-        console.error("Logout failed");
-        // You can add error handling here (toast notification, etc.)
-      }
+      await logout();
+      navigate('/admin-login');
     } catch (error) {
-      console.error("Error during logout:", error);
+      console.error('Logout failed:', error);
+      // You can add error handling here (toast notification, etc.)
     } finally {
       setIsLoggingOut(false);
     }
