@@ -19,7 +19,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/add-publication" element={<JournalRegistrationForm />} />
           <Route path="/view-publications" element={<ViewPublications />} />
-          <Route path="/admin-login" element={<AdminLogin />} />
+          <Route path="/research-publication/admin/login-rimt" element={<AdminLogin />} />
           
           {/* Protected Routes */}
           <Route 

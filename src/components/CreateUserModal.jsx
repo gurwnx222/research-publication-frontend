@@ -14,10 +14,9 @@ const CreateUserModal = ({ isOpen, onClose, onSubmit }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const roles = [
-    "Professor",
     "Associate Professor",
     "Assistant Professor",
-    "Lecturer",
+    "Professor",
     "Researcher",
     "Technical Staff",
   ];

@@ -30,34 +30,17 @@ export default function Users() {
   // Modal state - only for user creation
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
-  // New state for departments only
-  const [departments, setDepartments] = useState([]);
-
-  // Fetch departments
-  useEffect(() => {
-    const fetchDepartments = async () => {
-      try {
-        // Fetch departments
-        const deptResponse = await fetch(
-          `${BASE_URL}/private-data/departments`
-        );
-        if (deptResponse.ok) {
-          const deptData = await deptResponse.json();
-          setDepartments(deptData.data?.departments || deptData || []);
-        }
-      } catch (error) {
-        console.error("Error fetching departments:", error);
-      }
-    };
-
-    fetchDepartments();
-  }, []);
-
   // Fetch stats data
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const statsResponse = await fetch(`${BASE_URL}/private-data/counts`);
+        const statsResponse = await fetch(`${BASE_URL}/private-data/counts`, {
+        method: "GET",
+        credentials: 'include', // Important: This sends cookies
+        headers: {
+          "Content-Type": "application/json",
+        },
+        });
         if (!statsResponse.ok) {
           throw new Error("Failed to fetch stats");
         }
@@ -82,7 +65,13 @@ export default function Users() {
         ...(search && { search }),
       });
 
-      const response = await fetch(`${BASE_URL}/private-data/users?${params}`);
+      const response = await fetch(`${BASE_URL}/private-data/users?${params}`, {
+        method: "GET",
+        credentials: 'include', // Important: This sends cookies
+        headers: {
+          "Content-Type": "application/json",
+        },
+        });
       console.log("Fetching user data for:", response.url);
 
       if (!response.ok) {
@@ -169,12 +158,12 @@ export default function Users() {
   const handleModalClose = () => {
     setIsCreateModalOpen(false);
   };
-
   // Handle user creation submit
   const handleUserSubmit = async (userData) => {
     try {
       const response = await fetch(`${BASE_URL}/register`, {
         method: "POST",
+        credentials: 'include',
         headers: {
           "Content-Type": "application/json",
         },
