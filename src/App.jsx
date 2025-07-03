@@ -47,8 +47,7 @@ function App() {
             } 
           />
           
-          {/* Fallback route */}
-          <Route path="*" element={<Home />} />
+    
         </Routes>
       </Router>
     </AuthProvider>

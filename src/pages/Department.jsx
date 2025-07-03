@@ -97,12 +97,13 @@ const CreateDepartmentModal = ({ isOpen, onClose, onSubmit }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-
+    const BASE_URL = "http://localhost:3000/api";
     try {
       const response = await fetch(
-        "http://localhost:3000/api/register/department",
+        `${BASE_URL}/register/department`,
         {
           method: "POST",
+          credentials: "include", 
           headers: {
             "Content-Type": "application/json",
           },
@@ -274,7 +275,7 @@ const DepartmentDashboard = () => {
   const [totalCount, setTotalCount] = useState(0);
   const [isLoadingCount, setIsLoadingCount] = useState(true);
   const [isLoadingDepartments, setIsLoadingDepartments] = useState(true);
-
+  const BASE_URL = "http://localhost:3000/api";
   // Fetch departments and count on component mount
   useEffect(() => {
     fetchDepartments();
@@ -285,7 +286,13 @@ const DepartmentDashboard = () => {
     setIsLoadingDepartments(true);
     try {
       const response = await fetch(
-        "http://localhost:3000/api/private-data/departments"
+        `${BASE_URL}/private-data/departments`, {
+          method: "GET",
+          credentials: "include", // Include credentials for session management
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
       );
 
       if (!response.ok) {
@@ -314,7 +321,13 @@ const DepartmentDashboard = () => {
     setIsLoadingCount(true);
     try {
       const response = await fetch(
-        "http://localhost:3000/api/private-data/counts"
+        `${BASE_URL}/private-data/counts`, {
+          method: "GET",
+          credentials: "include", // Include credentials for session management
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
       );
 
       if (!response.ok) {

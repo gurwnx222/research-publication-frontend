@@ -28,13 +28,13 @@ const Dashboard = () => {
    */
   const fetchData = async () => {
     setLoading(true);
-
+    const BASE_URL = "http://localhost:3000/api";
     try {
       // Simulate API delay
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
       // FIXED: Added credentials: 'include' to send session cookies
-      const response = await fetch("http://localhost:3000/api/publications", {
+      const response = await fetch(`${BASE_URL}/publications`, {
         method: "GET",
         credentials: 'include', // This sends session cookies
         headers: {
@@ -45,7 +45,7 @@ const Dashboard = () => {
       if (!response.ok) {
         if (response.status === 401) {
           // Handle unauthorized - redirect to login
-          window.location.href = '/login';
+          window.location.href = '/home';
           return;
         }
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -58,7 +58,7 @@ const Dashboard = () => {
 
       // FIXED: Added credentials to stats request too
       const statsResponse = await fetch(
-        "http://localhost:3000/api/private-data/counts",
+        `${BASE_URL}/private-data/counts`,
         {
           method: "GET",
           credentials: 'include', // This sends session cookies
