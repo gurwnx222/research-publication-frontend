@@ -15,35 +15,45 @@ export const AuthProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // Initialize auth state from localStorage on mount
+  // Check if user is authenticated on mount
   useEffect(() => {
-    const initializeAuth = () => {
-      try {
-        const storedUser = localStorage.getItem('adminUser');
-        const storedSessionId = localStorage.getItem('adminSessionId');
-        
-        if (storedUser && storedSessionId) {
-          const userData = JSON.parse(storedUser);
-          setUser(userData);
-          setIsAuthenticated(true);
-        }
-      } catch (error) {
-        console.error('Error initializing auth:', error);
-        // Clear corrupted data
-        localStorage.removeItem('adminUser');
-        localStorage.removeItem('adminSessionId');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    initializeAuth();
+    checkAuthStatus();
   }, []);
+
+  const checkAuthStatus = async () => {
+    try {
+      // Check if user is authenticated by calling a protected endpoint
+      const response = await fetch("http://localhost:3000/api/admin/login", {
+        method: "POST",
+        credentials: 'include', // Important: This sends cookies
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setUser(data.user);
+        setIsAuthenticated(true);
+      } else {
+        // Not authenticated or session expired
+        setUser(null);
+        setIsAuthenticated(false);
+      }
+    } catch (error) {
+      console.error('Auth check error:', error);
+      setUser(null);
+      setIsAuthenticated(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const login = async (email, password, role) => {
     try {
       const response = await fetch("http://localhost:3000/api/admin/login", {
         method: "POST",
+        credentials: 'include', // FIXED: Added credentials to send/receive cookies
         headers: {
           "Content-Type": "application/json",
         },
@@ -57,19 +67,12 @@ export const AuthProvider = ({ children }) => {
       const data = await response.json();
 
       if (response.ok) {
-        // Store user data and session ID
+        // FIXED: Don't store in localStorage, rely on server session
         const userData = {
           email,
           role,
           ...data.user // Include any additional user data from API
         };
-        
-        localStorage.setItem('adminUser', JSON.stringify(userData));
-        
-        // Store session ID if provided by API
-        if (data.sessionId) {
-          localStorage.setItem('adminSessionId', data.sessionId);
-        }
 
         setUser(userData);
         setIsAuthenticated(true);
@@ -90,11 +93,23 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem('adminUser');
-    localStorage.removeItem('adminSessionId');
-    setUser(null);
-    setIsAuthenticated(false);
+  const logout = async () => {
+    try {
+      // Call logout endpoint to destroy session on server
+      await fetch("http://localhost:3000/api/admin/logout", {
+        method: "POST",
+        credentials: 'include', // Important: This sends cookies
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+    } catch (error) {
+      console.error("Logout error:", error);
+    } finally {
+      // Clear local state regardless of API call success
+      setUser(null);
+      setIsAuthenticated(false);
+    }
   };
 
   const value = {
@@ -103,6 +118,7 @@ export const AuthProvider = ({ children }) => {
     isLoading,
     login,
     logout,
+    checkAuthStatus, // Expose this for manual auth checks
   };
 
   return (

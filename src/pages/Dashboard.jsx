@@ -24,8 +24,7 @@ const Dashboard = () => {
   });
 
   /**
-   * Simulate fetching data from MongoDB
-   * Replace this with your actual API calls
+   * Fetch data from MongoDB with proper credentials
    */
   const fetchData = async () => {
     setLoading(true);
@@ -34,16 +33,50 @@ const Dashboard = () => {
       // Simulate API delay
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
-      // In a real app, replace with:
-      const response = await fetch("http://localhost:3000/api/publications");
+      // FIXED: Added credentials: 'include' to send session cookies
+      const response = await fetch("http://localhost:3000/api/publications", {
+        method: "GET",
+        credentials: 'include', // This sends session cookies
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          // Handle unauthorized - redirect to login
+          window.location.href = '/login';
+          return;
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const data = await response.json();
       const publicationsData = data.publications || [];
       console.log("Fetched publications:", data);
       setPublications(publicationsData);
-      // getting stats from the same API with a different endpoint
+
+      // FIXED: Added credentials to stats request too
       const statsResponse = await fetch(
-        "http://localhost:3000/api/private-data/counts"
+        "http://localhost:3000/api/private-data/counts",
+        {
+          method: "GET",
+          credentials: 'include', // This sends session cookies
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
       );
+
+      if (!statsResponse.ok) {
+        if (statsResponse.status === 401) {
+          // Handle unauthorized - redirect to login
+          window.location.href = '/login';
+          return;
+        }
+        throw new Error(`HTTP error! status: ${statsResponse.status}`);
+      }
+
       const statsData = await statsResponse.json();
       console.log("Fetched stats:", statsData);
       setStats({
@@ -54,6 +87,7 @@ const Dashboard = () => {
     } catch (error) {
       console.error("Error fetching data:", error);
       // Handle error state here
+      // You might want to show an error message to the user
     } finally {
       setLoading(false);
     }
