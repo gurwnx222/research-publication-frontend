@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Home, User, Building, X, LogOut } from "lucide-react";
+import { Home, User, Building, X, LogOut, Shield } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from '../context/AuthContext'; // Adjust path as needed
 
@@ -17,11 +17,12 @@ const Sidebar = ({ isOpen, onClose, activeTab = "dashboard", onTabChange }) => {
   const [currentTab, setCurrentTab] = useState(activeTab);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-  // Menu items configuration
+  // Menu items configuration with admin route added
   const menuItems = [
     { id: "dashboard", label: "Dashboard", icon: Home },
     { id: "users", label: "Users", icon: User },
     { id: "departments", label: "Departments", icon: Building },
+    { id: "admins", label: "Admins", icon: Shield },
   ];
 
   const handleTabClick = (tabId) => {
@@ -32,6 +33,7 @@ const Sidebar = ({ isOpen, onClose, activeTab = "dashboard", onTabChange }) => {
       dashboard: "/dashboard",
       departments: "/department",
       users: "/users",
+      admins: "/admins",
     };
 
     const target = pathMap[tabId];

@@ -9,6 +9,7 @@ import Department from "./pages/Department";
 import Users from "./pages/Users";
 import ViewPublications from "./pages/ViewPublications"; // adjust path
 import AdminLogin from "./pages/AdminLogin"; // adjust path
+import Admin from "./pages/Admin"
 
 function App() {
   return (
@@ -46,8 +47,14 @@ function App() {
               </ProtectedRoute>
             } 
           />
-          
-    
+            <Route 
+            path="/admins" 
+            element={
+              <ProtectedRoute>
+                <Admin />
+              </ProtectedRoute>
+            } 
+          />
         </Routes>
       </Router>
     </AuthProvider>
