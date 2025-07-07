@@ -9,11 +9,11 @@ const departments = [
 ];
 
 const journalTypes = [
-  "SCOPUS",
-  "WEB OF SCIENCE", 
   "SCI/ESCI",
-  "ICI",
+  "WEB OF SCIENCE",
+  "SCOPUS", 
   "UGC CARE",
+  "ICI",
   "OTHER"
 ];
 
