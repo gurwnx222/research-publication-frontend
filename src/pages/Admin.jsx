@@ -1,7 +1,6 @@
 import React from "react";
 import { useState, useEffect } from "react";
 import Sidebar from "../components/Sidebar";
-import DashboardHeader from "../components/ui/DashboardHeader";
 import AdminsGrid from "../components/ui/AdminsGrid";
 import CreateAdminModal from "../components/CreateAdminModal";
 import StatsCard from "../components/StatsCard";
@@ -33,7 +32,7 @@ export default function Admins() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const statsResponse = await fetch(`${BASE_URL}/private-data/counts`, {
+        const statsResponse = await fetch(`${BASE_URL}/private-data/admins`, {
           method: "GET",
           credentials: 'include', // Important: This sends cookies
           headers: {
@@ -114,13 +113,6 @@ export default function Admins() {
     fetchAdmins(1, searchTerm);
   }, []);
 
-  // Handle search
-  const handleSearchChange = (newSearchTerm) => {
-    setSearchTerm(newSearchTerm);
-    // Reset to page 1 when searching
-    fetchAdmins(1, newSearchTerm);
-  };
-
   // Handle page change
   const handlePageChange = (newPage) => {
     fetchAdmins(newPage, searchTerm);
@@ -171,7 +163,7 @@ export default function Admins() {
   // Handle admin creation submit
   const handleAdminSubmit = async (adminData) => {
     try {
-      const response = await fetch(`${BASE_URL}/admin/register`, {
+      const response = await fetch(`${BASE_URL}/register/admin`, {
         method: "POST",
         credentials: 'include',
         headers: {
@@ -210,11 +202,8 @@ export default function Admins() {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col lg:ml-0">
-        {/* Header */}
-        <DashboardHeader onCreateAdmin={handleCreateAdmin} />
-
         {/* Stats Cards - Only Total Admins */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 px-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 px-6 pt-6">
           <StatsCard 
             title="Total Admins" 
             count={totalAdmins} 
