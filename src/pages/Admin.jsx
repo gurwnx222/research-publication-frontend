@@ -44,7 +44,7 @@ export default function Admins() {
         }
         const stats = await statsResponse.json();
 
-        setTotalAdmins(stats?.counts?.admins || 0);
+        setTotalAdmins(stats?.adminCounts || 0);
       } catch (error) {
         console.error("Error fetching stats:", error);
       }

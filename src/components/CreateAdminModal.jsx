@@ -3,12 +3,12 @@ import { X, Shield, Eye, EyeOff } from "lucide-react";
 
 const CreateAdminModal = ({ isOpen, onClose, onSubmit }) => {
   const [formData, setFormData] = useState({
-    employeeId: "",
+    employee_id: "",
     fullname: "",
     email: "",
     password: "",
     role: "admin",
-    phoneNumber: "",
+    phone: "",
     isActive: true,
   });
 
@@ -22,12 +22,12 @@ const CreateAdminModal = ({ isOpen, onClose, onSubmit }) => {
     try {
       await onSubmit(formData);
       setFormData({
-        employeeId: "",
+        employee_id: "",
         fullname: "",
         email: "",
         password: "",
         role: "admin",
-        phoneNumber: "",
+        phone: "",
         isActive: true,
       });
     } finally {
@@ -82,8 +82,8 @@ const CreateAdminModal = ({ isOpen, onClose, onSubmit }) => {
             </label>
             <input
               type="text"
-              name="employeeId"
-              value={formData.employeeId}
+              name="employee_id"
+              value={formData.employee_id}
               onChange={handleChange}
               required
               className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
@@ -127,8 +127,8 @@ const CreateAdminModal = ({ isOpen, onClose, onSubmit }) => {
             </label>
             <input
               type="tel"
-              name="phoneNumber"
-              value={formData.phoneNumber}
+              name="phone"
+              value={formData.phone}
               onChange={handleChange}
               required
               className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
