@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 
 const departments = [
-  { id: "6855087c6db49ddcf8a3014e", name: "CSE" },
+  { id: "68730916eafef491d5e45f8c", name: "CSE" },
   { id: "6855087c6db49ddcf8a3014f", name: "Mechanical" },
   { id: "6855087c6db49ddcf8a30150", name: "Electrical" },
   { id: "6855087c6db49ddcf8a30151", name: "Civil" },
@@ -70,7 +70,13 @@ export default function JournalRegistrationForm() {
   const [errors, setErrors] = useState({});
   const [isEmployeeFound, setIsEmployeeFound] = useState(false);
   const [dragActive, setDragActive] = useState(false);
-
+  const [submitStatus, setSubmitStatus] = useState({
+    step: "",
+    message: "",
+    isError: false,
+  });
+  const [submit, setIsSubmitting] = useState(false);
+  const API_BASE_URL = "http://localhost:3000/api";
   // Auto-fill employee data when employee ID changes
   useEffect(() => {
     if (form.employeeId && form.employeeId.length >= 4) {
@@ -256,7 +262,6 @@ export default function JournalRegistrationForm() {
     setErrors(validationErrors);
 
     if (Object.keys(validationErrors).length > 0) {
-      // Scroll to first error
       const firstError = Object.keys(validationErrors)[0];
       const element = document.querySelector(`[name="${firstError}"]`);
       if (element) {
@@ -265,10 +270,148 @@ export default function JournalRegistrationForm() {
       return;
     }
 
+    setIsSubmitting(true);
+    setSubmitStatus({
+      step: "preparing",
+      message: "Preparing submission...",
+      isError: false,
+    });
+
     try {
-      // Your API submission logic here
-      console.log("Form submitted:", form);
-      alert("Publication registered successfully!");
+      // Step 1: Submit publication
+      setSubmitStatus({
+        step: "publication",
+        message: "Submitting publication...",
+        isError: false,
+      });
+
+      const formData = new FormData();
+
+      // Add all form fields
+      formData.append("employeeId", form.employeeId);
+      formData.append("authorName", form.authorName);
+      formData.append("authorDeptId", form.authorDeptId);
+      formData.append("journalType", form.journalType);
+      formData.append("journalName", form.journalName);
+      formData.append("isbnIssn", form.isbnIssn);
+      formData.append("publicationMonth", form.publicationMonth);
+      formData.append("publicationYear", form.publicationYear);
+      formData.append("title", form.title);
+      formData.append("pdfFile", form.pdf);
+
+      // Optional fields
+      if (form.doi) formData.append("doi", form.doi);
+      if (form.orcidID) formData.append("orcidID", form.orcidID);
+      if (form.coAuthors.length > 0) {
+        formData.append("coAuthors", JSON.stringify(form.coAuthors));
+      }
+
+      const publicationResponse = await fetch(`${API_BASE_URL}/publication`, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!publicationResponse.ok) {
+        const errorData = await publicationResponse.json();
+        throw new Error(
+          errorData.message ||
+            `Publication submission failed (${publicationResponse.status})`
+        );
+      }
+
+      const publicationResult = await publicationResponse.json();
+      console.log("Publication submitted successfully:", publicationResult);
+
+      // Extract publication ID from response
+      const publicationId =
+        publicationResult.publication?._id ||
+        publicationResult.publication?.id ||
+        publicationResult._id ||
+        publicationResult.id;
+
+      if (!publicationId) {
+        throw new Error(
+          "Publication ID not found in response. Please contact support."
+        );
+      }
+
+      // Step 2: Assign main author to publication
+      setSubmitStatus({
+        step: "author",
+        message: "Assigning author to publication...",
+        isError: false,
+      });
+
+      const authorAssignmentResponse = await fetch(
+        `${API_BASE_URL}/authors/assign-publication`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            employee_id: form.employeeId,
+            publication_id: publicationId,
+            author_order: 1, // Main author
+            author_name: form.authorName,
+            department: form.authorDeptId,
+          }),
+        }
+      );
+
+      let authorAssignmentSuccess = false;
+      if (!authorAssignmentResponse.ok) {
+        const errorData = await authorAssignmentResponse.json();
+        console.error("Author assignment failed:", errorData);
+
+        // Log warning but don't fail the entire process
+        console.warn(
+          "Publication was saved but author assignment failed:",
+          errorData.message
+        );
+        setSubmitStatus({
+          step: "author",
+          message: `Warning: ${errorData.message}. Publication saved successfully.`,
+          isError: false,
+        });
+      } else {
+        const assignmentResult = await authorAssignmentResponse.json();
+        console.log("Main author assigned successfully:", assignmentResult);
+        authorAssignmentSuccess = true;
+      }
+
+      // Step 3: Handle co-authors (if any)
+      if (form.coAuthors.length > 0) {
+        setSubmitStatus({
+          step: "coauthors",
+          message: "Processing co-authors...",
+          isError: false,
+        });
+
+        // For now, just log co-authors since we don't have their employee IDs
+        console.log("Co-authors to be processed:", form.coAuthors);
+
+        // You can implement co-author processing here when you have employee IDs
+        // This could involve:
+        // 1. Searching for co-authors by name in employee database
+        // 2. Creating a separate co-author management interface
+        // 3. Allowing manual assignment later
+      }
+
+      // Success!
+      setSubmitStatus({
+        step: "complete",
+        message: "Publication registered successfully!",
+        isError: false,
+      });
+
+      // Show success message
+      alert(
+        "Publication registered successfully!" +
+          (authorAssignmentSuccess
+            ? ""
+            : " (Author assignment may need manual review)")
+      );
 
       // Reset form
       setForm({
@@ -289,12 +432,60 @@ export default function JournalRegistrationForm() {
       });
       setErrors({});
       setIsEmployeeFound(false);
-    } catch (err) {
-      console.error(err);
-      alert("Submission failed: " + err.message);
+      setSubmitStatus({ step: "", message: "", isError: false });
+    } catch (error) {
+      console.error("Submission error:", error);
+      setSubmitStatus({
+        step: "error",
+        message: error.message || "An unexpected error occurred",
+        isError: true,
+      });
+      alert("Submission failed: " + error.message);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
+  // Add this component to show submission status
+  const SubmissionStatus = () => {
+    if (!submitStatus.step) return null;
+
+    return (
+      <div
+        className={`fixed top-4 right-4 max-w-sm p-4 rounded-lg shadow-lg z-50 ${
+          submitStatus.isError
+            ? "bg-red-100 border-red-500 text-red-700"
+            : "bg-blue-100 border-blue-500 text-blue-700"
+        } border`}
+      >
+        <div className="flex items-center">
+          {!submitStatus.isError && (
+            <svg
+              className="animate-spin -ml-1 mr-2 h-4 w-4"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              ></circle>
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              ></path>
+            </svg>
+          )}
+          <span className="text-sm font-medium">{submitStatus.message}</span>
+        </div>
+      </div>
+    );
+  };
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
       <div className="max-w-3xl mx-auto">
