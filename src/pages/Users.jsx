@@ -4,7 +4,7 @@ import Sidebar from "../components/Sidebar";
 import DashboardHeader from "../components/ui/DashboardHeader";
 import SearchBar from "../components/SearchBar";
 import UsersGrid from "../components/ui/UsersGrid";
-import CreateUserModal from "../components/CreateUserModal";
+import CreateAuthorModal from "../components/CreateAuthorModal"; // Updated import
 import StatsCard from "../components/StatsCard";
 import "../App.css";
 import { Users as UsersIcon } from "lucide-react";
@@ -30,16 +30,52 @@ export default function Users() {
   // Modal state - only for user creation
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
+  // Departments state for the modal
+  const [departments, setDepartments] = useState([
+    { _id: "68730916eafef491d5e45f8c", name: "Computer Science Engineering" },
+  ]);
+
+  // Fetch departments (you can implement this later)
+  useEffect(() => {
+    const fetchDepartments = async () => {
+      try {
+        const response = await fetch(`${BASE_URL}/departments`, {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setDepartments(
+            data.departments || [
+              {
+                _id: "68730916eafef491d5e45f8c",
+                name: "Computer Science Engineering",
+              },
+            ]
+          );
+        }
+      } catch (error) {
+        console.error("Error fetching departments:", error);
+        // Keep default department if fetch fails
+      }
+    };
+
+    fetchDepartments();
+  }, []);
+
   // Fetch stats data
   useEffect(() => {
     const fetchStats = async () => {
       try {
         const statsResponse = await fetch(`${BASE_URL}/private-data/counts`, {
-        method: "GET",
-        credentials: 'include', // Important: This sends cookies
-        headers: {
-          "Content-Type": "application/json",
-        },
+          method: "GET",
+          credentials: "include", // Important: This sends cookies
+          headers: {
+            "Content-Type": "application/json",
+          },
         });
         if (!statsResponse.ok) {
           throw new Error("Failed to fetch stats");
@@ -67,11 +103,11 @@ export default function Users() {
 
       const response = await fetch(`${BASE_URL}/private-data/users?${params}`, {
         method: "GET",
-        credentials: 'include', // Important: This sends cookies
+        credentials: "include", // Important: This sends cookies
         headers: {
           "Content-Type": "application/json",
         },
-        });
+      });
       console.log("Fetching user data for:", response.url);
 
       if (!response.ok) {
@@ -132,13 +168,16 @@ export default function Users() {
     try {
       const response = await fetch(`${BASE_URL}/private-data/users/${userId}`, {
         method: "DELETE",
+        credentials: "include", // Added credentials
       });
 
       if (response.ok) {
         // Refresh the current page after deletion
         fetchUsers(pagination.currentPage, searchTerm);
         // Also refresh stats
-        const statsResponse = await fetch(`${BASE_URL}/private-data/counts`);
+        const statsResponse = await fetch(`${BASE_URL}/private-data/counts`, {
+          credentials: "include",
+        });
         if (statsResponse.ok) {
           const stats = await statsResponse.json();
           setTotalUsers(stats?.counts?.users || 0);
@@ -149,37 +188,53 @@ export default function Users() {
     }
   };
 
-  // Handle create user
+  // Handle create user - FIXED: Added debugging
   const handleCreateUser = () => {
+    console.log("Create user button clicked!"); // Debug log
     setIsCreateModalOpen(true);
   };
 
   // Handle modal close
   const handleModalClose = () => {
+    console.log("Modal closing..."); // Debug log
     setIsCreateModalOpen(false);
   };
-  // Handle user creation submit
-  const handleUserSubmit = async (userData) => {
+
+  // Handle author creation submit
+  const handleAuthorSubmit = async (userData) => {
     try {
-      const response = await fetch(`${BASE_URL}/register`, {
+      console.log("Submitting author data:", userData); // Debug log
+
+      const response = await fetch(`${BASE_URL}/register/author`, {
         method: "POST",
-        credentials: 'include',
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(userData),
       });
-      console.log("Creating user with data:", userData);
+
+      console.log("Response status:", response.status); // Debug log
+
       if (response.ok) {
+        const result = await response.json();
+        console.log("Author created successfully:", result); // Debug log
+
         // Close modal and refresh data
         setIsCreateModalOpen(false);
         fetchUsers(pagination.currentPage, searchTerm);
+
         // Refresh stats
-        const statsResponse = await fetch(`${BASE_URL}/private-data/counts`);
+        const statsResponse = await fetch(`${BASE_URL}/private-data/counts`, {
+          credentials: "include",
+        });
         if (statsResponse.ok) {
           const stats = await statsResponse.json();
           setTotalUsers(stats?.counts?.users || 0);
         }
+      } else {
+        const errorData = await response.json();
+        console.error("Error response:", errorData);
       }
     } catch (error) {
       console.error("Error creating user:", error);
@@ -223,11 +278,12 @@ export default function Users() {
         </main>
       </div>
 
-      {/* Create User Modal */}
-      <CreateUserModal
+      {/* Register Author Modal - FIXED: Added departments prop and debug */}
+      <CreateAuthorModal
         isOpen={isCreateModalOpen}
         onClose={handleModalClose}
-        onSubmit={handleUserSubmit}
+        onSubmit={handleAuthorSubmit}
+        departments={departments}
       />
     </div>
   );

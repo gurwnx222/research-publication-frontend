@@ -9,7 +9,7 @@ import Department from "./pages/Department";
 import Users from "./pages/Users";
 import ViewPublications from "./pages/ViewPublications"; // adjust path
 import AdminLogin from "./pages/AdminLogin"; // adjust path
-import Admin from "./pages/Admin"
+import Admin from "./pages/Admin";
 
 function App() {
   return (
@@ -18,42 +18,41 @@ function App() {
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<Home />} />
-          <Route path="/add-publication" element={<JournalRegistrationForm />} />
+          <Route
+            path="/add-publication"
+            element={<JournalRegistrationForm />}
+          />
           <Route path="/view-publications" element={<ViewPublications />} />
-          <Route path="/research-publication/admin/login-rimt" element={<AdminLogin />} />
-          
+          <Route
+            path="/research-publication/admin/login-rimt"
+            element={<AdminLogin />}
+          />
+
           {/* Protected Routes */}
-          <Route 
-            path="/dashboard" 
+          <Route
+            path="/dashboard"
             element={
               <ProtectedRoute>
                 <Dashboard />
               </ProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="/department" 
+          <Route
+            path="/department"
             element={
               <ProtectedRoute>
                 <Department />
               </ProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="/users" 
-            element={
-              <ProtectedRoute>
-                <Users />
-              </ProtectedRoute>
-            } 
-          />
-            <Route 
-            path="/admins" 
+          <Route path="/users" element={<Users />} />
+          <Route
+            path="/admins"
             element={
               <ProtectedRoute>
                 <Admin />
               </ProtectedRoute>
-            } 
+            }
           />
         </Routes>
       </Router>

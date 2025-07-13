@@ -11,26 +11,42 @@ const departments = [
 const journalTypes = [
   "SCI/ESCI",
   "WEB OF SCIENCE",
-  "SCOPUS", 
+  "SCOPUS",
   "UGC CARE",
   "ICI",
-  "OTHER"
+  "OTHER",
 ];
 
 const months = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December"
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
 ];
 
 // Generate years from 1950 to current year
 const currentYear = new Date().getFullYear();
-const years = Array.from({ length: currentYear - 1949 }, (_, i) => 1950 + i).reverse();
+const years = Array.from(
+  { length: currentYear - 1949 },
+  (_, i) => 1950 + i
+).reverse();
 
 // Mock database for employee lookup
 const mockEmployeeDatabase = {
-  "12345": { name: "Dr. John Smith", department: "6855087c6db49ddcf8a3014e" },
-  "67890": { name: "Prof. Sarah Johnson", department: "6855087c6db49ddcf8a3014f" },
-  "11111": { name: "Dr. Mike Wilson", department: "6855087c6db49ddcf8a30150" },
+  12345: { name: "Dr. John Smith", department: "6855087c6db49ddcf8a3014e" },
+  67890: {
+    name: "Prof. Sarah Johnson",
+    department: "6855087c6db49ddcf8a3014f",
+  },
+  11111: { name: "Dr. Mike Wilson", department: "6855087c6db49ddcf8a30150" },
 };
 
 export default function JournalRegistrationForm() {
@@ -46,6 +62,7 @@ export default function JournalRegistrationForm() {
     title: "",
     pdf: null,
     doi: "",
+    orcidID: "",
     coAuthors: [],
     coAuthorInput: "",
   });
@@ -59,10 +76,10 @@ export default function JournalRegistrationForm() {
     if (form.employeeId && form.employeeId.length >= 4) {
       const employee = mockEmployeeDatabase[form.employeeId];
       if (employee) {
-        setForm(prev => ({
+        setForm((prev) => ({
           ...prev,
           authorName: employee.name,
-          authorDeptId: employee.department
+          authorDeptId: employee.department,
         }));
         setIsEmployeeFound(true);
       } else {
@@ -77,12 +94,16 @@ export default function JournalRegistrationForm() {
     const newErrors = {};
     if (!form.employeeId) newErrors.employeeId = "Employee ID is required";
     if (!form.authorName) newErrors.authorName = "Author name is required";
-    if (!form.authorDeptId) newErrors.authorDeptId = "Author department is required";
+    if (!form.authorDeptId)
+      newErrors.authorDeptId = "Author department is required";
     if (!form.journalType) newErrors.journalType = "Journal type is required";
-    if (!form.journalName) newErrors.journalName = "Journal/Conference name is required";
+    if (!form.journalName)
+      newErrors.journalName = "Journal/Conference name is required";
     if (!form.isbnIssn) newErrors.isbnIssn = "ISBN/ISSN number is required";
-    if (!form.publicationMonth) newErrors.publicationMonth = "Publication month is required";
-    if (!form.publicationYear) newErrors.publicationYear = "Publication year is required";
+    if (!form.publicationMonth)
+      newErrors.publicationMonth = "Publication month is required";
+    if (!form.publicationYear)
+      newErrors.publicationYear = "Publication year is required";
     if (!form.title) newErrors.title = "Title is required";
     if (!form.pdf) newErrors.pdf = "PDF document is required";
 
@@ -91,25 +112,29 @@ export default function JournalRegistrationForm() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setForm(prev => ({ ...prev, [name]: value }));
+    setForm((prev) => ({ ...prev, [name]: value }));
     if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: "" }));
+      setErrors((prev) => ({ ...prev, [name]: "" }));
     }
   };
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      if (file.size > 10 * 1024 * 1024) { // 10MB limit
-        setErrors(prev => ({ ...prev, pdf: "File size must be less than 10MB" }));
+      if (file.size > 10 * 1024 * 1024) {
+        // 10MB limit
+        setErrors((prev) => ({
+          ...prev,
+          pdf: "File size must be less than 10MB",
+        }));
         return;
       }
       if (file.type !== "application/pdf") {
-        setErrors(prev => ({ ...prev, pdf: "Only PDF files are allowed" }));
+        setErrors((prev) => ({ ...prev, pdf: "Only PDF files are allowed" }));
         return;
       }
-      setForm(prev => ({ ...prev, pdf: file }));
-      setErrors(prev => ({ ...prev, pdf: "" }));
+      setForm((prev) => ({ ...prev, pdf: file }));
+      setErrors((prev) => ({ ...prev, pdf: "" }));
     }
   };
 
@@ -130,39 +155,87 @@ export default function JournalRegistrationForm() {
     const file = e.dataTransfer.files[0];
     if (file) {
       if (file.size > 10 * 1024 * 1024) {
-        setErrors(prev => ({ ...prev, pdf: "File size must be less than 10MB" }));
+        setErrors((prev) => ({
+          ...prev,
+          pdf: "File size must be less than 10MB",
+        }));
         return;
       }
       if (file.type !== "application/pdf") {
-        setErrors(prev => ({ ...prev, pdf: "Only PDF files are allowed" }));
+        setErrors((prev) => ({ ...prev, pdf: "Only PDF files are allowed" }));
         return;
       }
-      setForm(prev => ({ ...prev, pdf: file }));
-      setErrors(prev => ({ ...prev, pdf: "" }));
+      setForm((prev) => ({ ...prev, pdf: file }));
+      setErrors((prev) => ({ ...prev, pdf: "" }));
     }
   };
 
   const handleIsbnIssnChange = (e) => {
-    let value = e.target.value.replace(/[^0-9X-]/g, '');
-    
+    let value = e.target.value.replace(/[^0-9X-]/g, "");
+
     // Auto-format ISBN/ISSN
     if (value.length <= 8) {
       // ISSN format: XXXX-XXXX
-      value = value.replace(/(\d{4})(\d{1,4})/, '$1-$2');
+      value = value.replace(/(\d{4})(\d{1,4})/, "$1-$2");
     } else if (value.length <= 13) {
       // ISBN-13 format: XXX-X-XX-XXXXXX-X
-      value = value.replace(/(\d{3})(\d{1})(\d{1,2})(\d{1,6})(\d{1})/, '$1-$2-$3-$4-$5');
+      value = value.replace(
+        /(\d{3})(\d{1})(\d{1,2})(\d{1,6})(\d{1})/,
+        "$1-$2-$3-$4-$5"
+      );
     }
-    
-    setForm(prev => ({ ...prev, isbnIssn: value }));
+
+    setForm((prev) => ({ ...prev, isbnIssn: value }));
     if (errors.isbnIssn) {
-      setErrors(prev => ({ ...prev, isbnIssn: "" }));
+      setErrors((prev) => ({ ...prev, isbnIssn: "" }));
     }
   };
+  const handleOrcidChange = (e) => {
+    let value = e.target.value.replace(/[^0-9X-]/g, "");
 
+    // Auto-format ORCID: XXXX-XXXX-XXXX-XXXX
+    if (value.length > 0) {
+      value = value.replace(
+        /(\d{4})(\d{1,4})?(\d{1,4})?(\d{1,4})?/,
+        (match, p1, p2, p3, p4) => {
+          let formatted = p1;
+          if (p2) formatted += `-${p2}`;
+          if (p3) formatted += `-${p3}`;
+          if (p4) formatted += `-${p4}`;
+          return formatted;
+        }
+      );
+    }
+
+    setForm((prev) => ({ ...prev, orcidId: value }));
+    if (errors.orcidId) {
+      setErrors((prev) => ({ ...prev, orcidId: "" }));
+    }
+  };
+  const handleDoiChange = (e) => {
+    let value = e.target.value.trim();
+
+    // Remove common prefixes if user pastes full URL
+    value = value.replace(/^https?:\/\/(dx\.)?doi\.org\//, "");
+    value = value.replace(/^doi:/, "");
+
+    // DOI format: 10.XXXX/suffix (no character restrictions on suffix)
+    // Only ensure it starts with "10." if user is typing a DOI
+    if (value && !value.startsWith("10.") && /^\d/.test(value)) {
+      // If starts with digits but not "10.", assume they're typing a DOI
+      if (value.startsWith("10")) {
+        value = value.replace(/^10/, "10.");
+      }
+    }
+
+    setForm((prev) => ({ ...prev, doi: value }));
+    if (errors.doi) {
+      setErrors((prev) => ({ ...prev, doi: "" }));
+    }
+  };
   const handleAddCoAuthor = () => {
     if (form.coAuthorInput.trim()) {
-      setForm(prev => ({
+      setForm((prev) => ({
         ...prev,
         coAuthors: [...prev.coAuthors, prev.coAuthorInput.trim()],
         coAuthorInput: "",
@@ -171,9 +244,9 @@ export default function JournalRegistrationForm() {
   };
 
   const handleRemoveCoAuthor = (index) => {
-    setForm(prev => ({
+    setForm((prev) => ({
       ...prev,
-      coAuthors: prev.coAuthors.filter((_, i) => i !== index)
+      coAuthors: prev.coAuthors.filter((_, i) => i !== index),
     }));
   };
 
@@ -181,13 +254,13 @@ export default function JournalRegistrationForm() {
     e.preventDefault();
     const validationErrors = validate();
     setErrors(validationErrors);
-    
+
     if (Object.keys(validationErrors).length > 0) {
       // Scroll to first error
       const firstError = Object.keys(validationErrors)[0];
       const element = document.querySelector(`[name="${firstError}"]`);
       if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        element.scrollIntoView({ behavior: "smooth", block: "center" });
       }
       return;
     }
@@ -196,7 +269,7 @@ export default function JournalRegistrationForm() {
       // Your API submission logic here
       console.log("Form submitted:", form);
       alert("Publication registered successfully!");
-      
+
       // Reset form
       setForm({
         employeeId: "",
@@ -210,6 +283,7 @@ export default function JournalRegistrationForm() {
         title: "",
         pdf: null,
         doi: "",
+        orcidID: "",
         coAuthors: [],
         coAuthorInput: "",
       });
@@ -248,14 +322,22 @@ export default function JournalRegistrationForm() {
               value={form.employeeId}
               onChange={handleInputChange}
               className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors ${
-                errors.employeeId ? 'border-red-500' : 'border-gray-300'
+                errors.employeeId ? "border-red-500" : "border-gray-300"
               }`}
               placeholder="Enter your employee ID"
             />
             {isEmployeeFound && (
               <p className="mt-2 text-sm text-green-600 flex items-center">
-                <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                <svg
+                  className="w-4 h-4 mr-1"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                    clipRule="evenodd"
+                  />
                 </svg>
                 Employee found - details auto-filled
               </p>
@@ -276,7 +358,7 @@ export default function JournalRegistrationForm() {
               value={form.authorName}
               onChange={handleInputChange}
               className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors ${
-                errors.authorName ? 'border-red-500' : 'border-gray-300'
+                errors.authorName ? "border-red-500" : "border-gray-300"
               }`}
               placeholder="Enter author name"
               readOnly={isEmployeeFound}
@@ -296,13 +378,13 @@ export default function JournalRegistrationForm() {
               value={form.authorDeptId}
               onChange={handleInputChange}
               className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors appearance-none bg-white ${
-                errors.authorDeptId ? 'border-red-500' : 'border-gray-300'
+                errors.authorDeptId ? "border-red-500" : "border-gray-300"
               }`}
               style={{
                 backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e")`,
-                backgroundRepeat: 'no-repeat',
-                backgroundPosition: 'right 12px center',
-                backgroundSize: '16px'
+                backgroundRepeat: "no-repeat",
+                backgroundPosition: "right 12px center",
+                backgroundSize: "16px",
               }}
               disabled={isEmployeeFound}
             >
@@ -328,13 +410,13 @@ export default function JournalRegistrationForm() {
               value={form.journalType}
               onChange={handleInputChange}
               className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors appearance-none bg-white ${
-                errors.journalType ? 'border-red-500' : 'border-gray-300'
+                errors.journalType ? "border-red-500" : "border-gray-300"
               }`}
               style={{
                 backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e")`,
-                backgroundRepeat: 'no-repeat',
-                backgroundPosition: 'right 12px center',
-                backgroundSize: '16px'
+                backgroundRepeat: "no-repeat",
+                backgroundPosition: "right 12px center",
+                backgroundSize: "16px",
               }}
             >
               <option value="">Select journal type</option>
@@ -360,7 +442,7 @@ export default function JournalRegistrationForm() {
               value={form.journalName}
               onChange={handleInputChange}
               className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors ${
-                errors.journalName ? 'border-red-500' : 'border-gray-300'
+                errors.journalName ? "border-red-500" : "border-gray-300"
               }`}
               placeholder="Enter journal or conference name"
             />
@@ -380,12 +462,13 @@ export default function JournalRegistrationForm() {
               value={form.isbnIssn}
               onChange={handleIsbnIssnChange}
               className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors ${
-                errors.isbnIssn ? 'border-red-500' : 'border-gray-300'
+                errors.isbnIssn ? "border-red-500" : "border-gray-300"
               }`}
               placeholder="Enter ISBN or ISSN number"
             />
             <p className="mt-1 text-xs text-gray-500">
-              Format will be automatically applied (e.g., 1234-5678 for ISSN, 978-1-23-456789-0 for ISBN)
+              Format will be automatically applied (e.g., 1234-5678 for ISSN,
+              978-1-23-456789-0 for ISBN)
             </p>
             {errors.isbnIssn && (
               <p className="mt-2 text-sm text-red-600">{errors.isbnIssn}</p>
@@ -404,13 +487,15 @@ export default function JournalRegistrationForm() {
                   value={form.publicationMonth}
                   onChange={handleInputChange}
                   className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors appearance-none bg-white ${
-                    errors.publicationMonth ? 'border-red-500' : 'border-gray-300'
+                    errors.publicationMonth
+                      ? "border-red-500"
+                      : "border-gray-300"
                   }`}
                   style={{
                     backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e")`,
-                    backgroundRepeat: 'no-repeat',
-                    backgroundPosition: 'right 12px center',
-                    backgroundSize: '16px'
+                    backgroundRepeat: "no-repeat",
+                    backgroundPosition: "right 12px center",
+                    backgroundSize: "16px",
                   }}
                 >
                   <option value="">Select month</option>
@@ -421,7 +506,9 @@ export default function JournalRegistrationForm() {
                   ))}
                 </select>
                 {errors.publicationMonth && (
-                  <p className="mt-2 text-sm text-red-600">{errors.publicationMonth}</p>
+                  <p className="mt-2 text-sm text-red-600">
+                    {errors.publicationMonth}
+                  </p>
                 )}
               </div>
               <div>
@@ -430,13 +517,15 @@ export default function JournalRegistrationForm() {
                   value={form.publicationYear}
                   onChange={handleInputChange}
                   className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors appearance-none bg-white ${
-                    errors.publicationYear ? 'border-red-500' : 'border-gray-300'
+                    errors.publicationYear
+                      ? "border-red-500"
+                      : "border-gray-300"
                   }`}
                   style={{
                     backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e")`,
-                    backgroundRepeat: 'no-repeat',
-                    backgroundPosition: 'right 12px center',
-                    backgroundSize: '16px'
+                    backgroundRepeat: "no-repeat",
+                    backgroundPosition: "right 12px center",
+                    backgroundSize: "16px",
                   }}
                 >
                   <option value="">Select year</option>
@@ -447,7 +536,9 @@ export default function JournalRegistrationForm() {
                   ))}
                 </select>
                 {errors.publicationYear && (
-                  <p className="mt-2 text-sm text-red-600">{errors.publicationYear}</p>
+                  <p className="mt-2 text-sm text-red-600">
+                    {errors.publicationYear}
+                  </p>
                 )}
               </div>
             </div>
@@ -464,7 +555,7 @@ export default function JournalRegistrationForm() {
               onChange={handleInputChange}
               rows={3}
               className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors resize-none ${
-                errors.title ? 'border-red-500' : 'border-gray-300'
+                errors.title ? "border-red-500" : "border-gray-300"
               }`}
               placeholder="Enter the complete title of your publication"
             />
@@ -480,8 +571,8 @@ export default function JournalRegistrationForm() {
             </label>
             <div
               className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
-                dragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
-              } ${errors.pdf ? 'border-red-500' : ''}`}
+                dragActive ? "border-blue-500 bg-blue-50" : "border-gray-300"
+              } ${errors.pdf ? "border-red-500" : ""}`}
               onDragEnter={handleDrag}
               onDragLeave={handleDrag}
               onDragOver={handleDrag}
@@ -489,8 +580,18 @@ export default function JournalRegistrationForm() {
             >
               {form.pdf ? (
                 <div className="text-green-600">
-                  <svg className="mx-auto h-12 w-12 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  <svg
+                    className="mx-auto h-12 w-12 mb-2"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
                   </svg>
                   <p className="font-medium">{form.pdf.name}</p>
                   <p className="text-sm text-gray-500">
@@ -499,10 +600,22 @@ export default function JournalRegistrationForm() {
                 </div>
               ) : (
                 <div className="text-gray-500">
-                  <svg className="mx-auto h-12 w-12 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                  <svg
+                    className="mx-auto h-12 w-12 mb-2"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                    />
                   </svg>
-                  <p className="font-medium mb-1">Drop your PDF here or click to browse</p>
+                  <p className="font-medium mb-1">
+                    Drop your PDF here or click to browse
+                  </p>
                   <p className="text-sm">Maximum file size: 10MB</p>
                 </div>
               )}
@@ -528,15 +641,16 @@ export default function JournalRegistrationForm() {
           {/* DOI */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              DOI (Digital Object Identifier) <span className="text-gray-500">(Optional)</span>
+              DOI (Digital Object Identifier){" "}
+              <span className="text-gray-500">(Optional)</span>
             </label>
             <input
               type="text"
               name="doi"
               value={form.doi}
-              onChange={handleInputChange}
+              onChange={handleDoiChange}
               className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors ${
-                errors.doi ? 'border-red-500' : 'border-gray-300'
+                errors.doi ? "border-red-500" : "border-gray-300"
               }`}
               placeholder="e.g., 10.1000/182"
             />
@@ -544,7 +658,25 @@ export default function JournalRegistrationForm() {
               <p className="mt-2 text-sm text-red-600">{errors.doi}</p>
             )}
           </div>
-
+          {/* orcidID */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              ORCID ID <span className="text-gray-500">(Optional)</span>
+            </label>
+            <input
+              type="text"
+              name="orcidID"
+              value={form.orcidID}
+              onChange={handleOrcidChange}
+              className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors ${
+                errors.orcidID ? "border-red-500" : "border-gray-300"
+              }`}
+              placeholder="e.g., 0000-0000-0000-0000"
+            />
+            {errors.orcidID && (
+              <p className="mt-2 text-sm text-red-600">{errors.orcidID}</p>
+            )}
+          </div>
           {/* Co-authors */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -555,10 +687,14 @@ export default function JournalRegistrationForm() {
                 type="text"
                 name="coAuthorInput"
                 value={form.coAuthorInput}
-                onChange={(e) => setForm({ ...form, coAuthorInput: e.target.value })}
+                onChange={(e) =>
+                  setForm({ ...form, coAuthorInput: e.target.value })
+                }
                 className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
                 placeholder="Enter co-author name"
-                onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCoAuthor())}
+                onKeyPress={(e) =>
+                  e.key === "Enter" && (e.preventDefault(), handleAddCoAuthor())
+                }
               />
               <button
                 type="button"
@@ -570,17 +706,32 @@ export default function JournalRegistrationForm() {
             </div>
             {form.coAuthors.length > 0 && (
               <div className="space-y-2">
-                <p className="text-sm font-medium text-gray-700">Added co-authors:</p>
+                <p className="text-sm font-medium text-gray-700">
+                  Added co-authors:
+                </p>
                 {form.coAuthors.map((author, index) => (
-                  <div key={index} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
+                  <div
+                    key={index}
+                    className="flex items-center justify-between bg-gray-50 p-3 rounded-lg"
+                  >
                     <span className="text-gray-700">{author}</span>
                     <button
                       type="button"
                       onClick={() => handleRemoveCoAuthor(index)}
                       className="text-red-500 hover:text-red-700 p-1"
                     >
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M6 18L18 6M6 6l12 12"
+                        />
                       </svg>
                     </button>
                   </div>
@@ -593,7 +744,7 @@ export default function JournalRegistrationForm() {
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <button
               type="submit"
-                              className="w-full bg-gray-800 text-white py-3 px-6 rounded-lg font-medium hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+              className="w-full bg-gray-800 text-white py-3 px-6 rounded-lg font-medium hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
             >
               Submit Publication
             </button>

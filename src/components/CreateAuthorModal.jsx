@@ -1,67 +1,111 @@
 import React, { useState } from "react";
-import { X, PenTool, BookOpen } from "lucide-react";
+import {
+  X,
+  UserPlus,
+  User,
+  Mail,
+  Lock,
+  Building,
+  Briefcase,
+  Hash,
+  Eye,
+  EyeOff,
+} from "lucide-react";
 
-const CreateAuthorModal = ({ isOpen, onClose, onSubmit, departments = [] }) => {
+const CreateAuthorModal = ({
+  isOpen,
+  onClose,
+  onSubmit,
+  departments = [
+    { _id: "68730916eafef491d5e45f8c", name: "Computer Science Engineering" },
+  ],
+}) => {
   const [formData, setFormData] = useState({
     employee_id: "",
     author_name: "",
     email: "",
+    password: "",
+    role: "Researcher",
     department: "",
-    publication_title: "", // Changed from publication_id to publication_title
-    author_order: 1,
+    isActive: true,
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
+  const roleOptions = [
+    "Associate Professor",
+    "Assistant Professor",
+    "Professor",
+    "Researcher",
+    "Technical Staff",
+  ];
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     try {
-      // Convert employee_id to number and author_order to number
+      // Convert employee_id to number for submission
       const submitData = {
         ...formData,
         employee_id: parseInt(formData.employee_id),
-        author_order: parseInt(formData.author_order),
+        // These fields are not needed for standalone author registration
+        publication_id: null,
+        author_order: null,
       };
 
+      console.log("Submitting author data:", submitData); // Debug log
+
       await onSubmit(submitData);
+
+      // Reset form after successful submission
       setFormData({
         employee_id: "",
         author_name: "",
         email: "",
+        password: "",
+        role: "Researcher",
         department: "",
-        publication_title: "",
-        author_order: 1,
+        isActive: true,
       });
+    } catch (error) {
+      console.error("Error registering author:", error);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
-  // Check if email is required (only for primary author)
-  const isEmailRequired = parseInt(formData.author_order) === 1;
+  const generatePassword = () => {
+    const chars =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
+    let result = "";
+    for (let i = 0; i < 12; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    setFormData((prev) => ({ ...prev, password: result }));
+  };
 
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
-        <div className="flex items-center justify-between p-6 border-b border-gray-100 bg-gradient-to-r from-green-50 to-teal-50 rounded-t-2xl">
+        <div className="flex items-center justify-between p-6 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-2xl">
           <div className="flex items-center space-x-3">
-            <div className="p-2 bg-green-100 rounded-lg">
-              <PenTool className="w-5 h-5 text-green-600" />
+            <div className="p-2 bg-blue-100 rounded-lg">
+              <UserPlus className="w-5 h-5 text-blue-600" />
             </div>
             <h2 className="text-xl font-semibold text-gray-900">
-              Create New Author
+              Register New Author
             </h2>
           </div>
           <button
@@ -72,49 +116,33 @@ const CreateAuthorModal = ({ isOpen, onClose, onSubmit, departments = [] }) => {
           </button>
         </div>
 
-        <div className="p-6 space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Employee ID *
-              </label>
-              <input
-                type="number"
-                name="employee_id"
-                value={formData.employee_id}
-                onChange={handleChange}
-                required
-                min="1"
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
-                placeholder="e.g., 1001"
-              />
-              <p className="mt-1 text-xs text-gray-500">
-                Must be a positive number and unique
-              </p>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Author Order *
-              </label>
-              <input
-                type="number"
-                name="author_order"
-                value={formData.author_order}
-                onChange={handleChange}
-                required
-                min="1"
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
-                placeholder="e.g., 1"
-              />
-              <p className="mt-1 text-xs text-gray-500">
-                1 for primary author, 2 for second, etc.
-              </p>
-            </div>
-          </div>
-
+        {/* FIXED: Added form wrapper with onSubmit handler */}
+        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          {/* Employee ID */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
+              <Hash className="w-4 h-4 inline mr-1" />
+              Employee ID *
+            </label>
+            <input
+              type="number"
+              name="employee_id"
+              value={formData.employee_id}
+              onChange={handleChange}
+              required
+              min="1"
+              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
+              placeholder="e.g., 1001"
+            />
+            <p className="mt-1 text-xs text-gray-500">
+              Must be a positive number and unique across the system
+            </p>
+          </div>
+
+          {/* Author Name */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              <User className="w-4 h-4 inline mr-1" />
               Author Name *
             </label>
             <input
@@ -124,35 +152,104 @@ const CreateAuthorModal = ({ isOpen, onClose, onSubmit, departments = [] }) => {
               onChange={handleChange}
               required
               maxLength={100}
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
+              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
               placeholder="e.g., Dr. John Smith"
             />
-            <p className="mt-1 text-xs text-gray-500">Maximum 100 characters</p>
+            <p className="mt-1 text-xs text-gray-500">
+              Maximum 100 characters. Full name with title if applicable
+            </p>
           </div>
 
+          {/* Email */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Email Address {isEmailRequired && "*"}
+              <Mail className="w-4 h-4 inline mr-1" />
+              Email Address *
             </label>
             <input
               type="email"
               name="email"
               value={formData.email}
               onChange={handleChange}
-              required={isEmailRequired}
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
+              required
+              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
               placeholder="e.g., john.smith@university.edu"
             />
             <p className="mt-1 text-xs text-gray-500">
-              {isEmailRequired
-                ? "Required for primary author (author order 1)"
-                : "Optional for non-primary authors"}
+              Must be a valid email address and unique in the system
             </p>
           </div>
 
+          {/* Password - FIXED: Added show/hide toggle like admin modal */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              <Lock className="w-4 h-4 inline mr-1" />
+              Password *
+            </label>
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                required
+                minLength={6}
+                className="w-full px-4 py-3 pr-20 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white font-mono text-sm"
+                placeholder="Enter secure password"
+              />
+              <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex space-x-1">
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="p-1.5 text-gray-400 hover:text-gray-600 rounded-lg transition-colors duration-200"
+                  title={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={generatePassword}
+              className="mt-2 text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors duration-200"
+            >
+              Generate Secure Password
+            </button>
+            <p className="mt-1 text-xs text-gray-500">
+              Minimum 6 characters. Use a strong password for security
+            </p>
+          </div>
+
+          {/* Role and Department Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Role */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
+                <Briefcase className="w-4 h-4 inline mr-1" />
+                Role *
+              </label>
+              <select
+                name="role"
+                value={formData.role}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
+              >
+                {roleOptions.map((role) => (
+                  <option key={role} value={role}>
+                    {role}
+                  </option>
+                ))}
+              </select>
+              <p className="mt-1 text-xs text-gray-500">
+                Academic or professional role
+              </p>
+            </div>
+
+            {/* Department */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                <Building className="w-4 h-4 inline mr-1" />
                 Department *
               </label>
               <select
@@ -160,7 +257,7 @@ const CreateAuthorModal = ({ isOpen, onClose, onSubmit, departments = [] }) => {
                 value={formData.department}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
               >
                 <option value="">Select a department</option>
                 {departments.map((dept) => (
@@ -170,46 +267,50 @@ const CreateAuthorModal = ({ isOpen, onClose, onSubmit, departments = [] }) => {
                 ))}
               </select>
               <p className="mt-1 text-xs text-gray-500">
-                Reference to Department collection
-              </p>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Publication Title *
-              </label>
-              <input
-                type="text"
-                name="publication_title"
-                value={formData.publication_title}
-                onChange={handleChange}
-                required
-                maxLength={200}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
-                placeholder="e.g., Research Paper Title"
-              />
-              <p className="mt-1 text-xs text-gray-500">
-                Enter the publication title directly
+                Author's affiliated department
               </p>
             </div>
           </div>
 
-          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mt-6">
+          {/* Active Status */}
+          <div className="flex items-center space-x-3">
+            <input
+              type="checkbox"
+              name="isActive"
+              id="isActive"
+              checked={formData.isActive}
+              onChange={handleChange}
+              className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+            />
+            <label
+              htmlFor="isActive"
+              className="text-sm font-medium text-gray-700"
+            >
+              Active Author
+            </label>
+            <p className="text-xs text-gray-500">
+              Uncheck to deactivate the author profile
+            </p>
+          </div>
+
+          {/* Information Box */}
+          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
             <div className="flex items-start space-x-2">
-              <BookOpen className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+              <UserPlus className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
               <div>
                 <h4 className="text-sm font-medium text-blue-800">
-                  Schema Information
+                  Author Registration
                 </h4>
                 <p className="text-xs text-blue-600 mt-1">
-                  This form creates an author entry linked to a specific
-                  department. Each author has an order (1 for primary author)
-                  and email is only required for the primary author.
+                  This creates a standalone author profile that can later be
+                  assigned to publications. The author will be registered in the
+                  system but not linked to any specific publication initially.
                 </p>
               </div>
             </div>
           </div>
 
+          {/* Action Buttons - FIXED: Submit button now has type="submit" */}
           <div className="flex space-x-3 pt-4">
             <button
               type="button"
@@ -220,15 +321,14 @@ const CreateAuthorModal = ({ isOpen, onClose, onSubmit, departments = [] }) => {
               Cancel
             </button>
             <button
-              type="button"
-              onClick={handleSubmit}
+              type="submit"
               disabled={isSubmitting}
-              className="flex-1 px-4 py-3 text-white bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700 rounded-xl font-medium transition-all duration-200 disabled:opacity-50 shadow-lg hover:shadow-xl"
+              className="flex-1 px-4 py-3 text-white bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 rounded-xl font-medium transition-all duration-200 disabled:opacity-50 shadow-lg hover:shadow-xl"
             >
-              {isSubmitting ? "Creating Author..." : "Create Author"}
+              {isSubmitting ? "Registering Author..." : "Register Author"}
             </button>
           </div>
-        </div>
+        </form>
       </div>
     </div>
   );
