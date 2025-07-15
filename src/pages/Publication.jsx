@@ -255,7 +255,6 @@ export default function JournalRegistrationForm() {
       coAuthors: prev.coAuthors.filter((_, i) => i !== index),
     }));
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     const validationErrors = validate();
@@ -306,20 +305,57 @@ export default function JournalRegistrationForm() {
         formData.append("coAuthors", JSON.stringify(form.coAuthors));
       }
 
-      const publicationResponse = await fetch(`${API_BASE_URL}/publication`, {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!publicationResponse.ok) {
-        const errorData = await publicationResponse.json();
+      // Check if API server is reachable first
+      let publicationResponse;
+      try {
+        publicationResponse = await fetch(`${API_BASE_URL}/publication`, {
+          method: "POST",
+          body: formData,
+        });
+      } catch (networkError) {
         throw new Error(
-          errorData.message ||
-            `Publication submission failed (${publicationResponse.status})`
+          `Cannot connect to server. Please check if the API server is running at ${API_BASE_URL}`
         );
       }
 
-      const publicationResult = await publicationResponse.json();
+      // Check if response is JSON
+      const contentType = publicationResponse.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        // If it's not JSON, try to get the text to see what was returned
+        const responseText = await publicationResponse.text();
+        console.error("Non-JSON response received:", responseText);
+
+        if (responseText.includes("<!DOCTYPE")) {
+          throw new Error(
+            "Server returned HTML instead of JSON. This usually means the API endpoint doesn't exist or the server is not configured correctly."
+          );
+        }
+
+        throw new Error(
+          `Server returned unexpected content type: ${contentType}. Expected JSON.`
+        );
+      }
+
+      if (!publicationResponse.ok) {
+        let errorMessage;
+        try {
+          const errorData = await publicationResponse.json();
+          errorMessage =
+            errorData.message ||
+            `HTTP ${publicationResponse.status}: ${publicationResponse.statusText}`;
+        } catch (parseError) {
+          errorMessage = `HTTP ${publicationResponse.status}: ${publicationResponse.statusText}`;
+        }
+        throw new Error(errorMessage);
+      }
+
+      let publicationResult;
+      try {
+        publicationResult = await publicationResponse.json();
+      } catch (parseError) {
+        throw new Error("Failed to parse server response as JSON");
+      }
+
       console.log("Publication submitted successfully:", publicationResult);
 
       // Extract publication ID from response
@@ -342,42 +378,53 @@ export default function JournalRegistrationForm() {
         isError: false,
       });
 
-      const authorAssignmentResponse = await fetch(
-        `${API_BASE_URL}/authors/assign-publication`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            employee_id: form.employeeId,
-            publication_id: publicationId,
-            author_order: 1, // Main author
-            author_name: form.authorName,
-            department: form.authorDeptId,
-          }),
-        }
-      );
+      let authorAssignmentResponse;
+      try {
+        authorAssignmentResponse = await fetch(
+          `${API_BASE_URL}/authors/assign-publication`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              employee_id: form.employeeId,
+              publication_id: publicationId,
+              author_order: 1, // Main author
+              author_name: form.authorName,
+              department: form.authorDeptId,
+            }),
+          }
+        );
+      } catch (networkError) {
+        console.warn(
+          "Author assignment failed due to network error:",
+          networkError
+        );
+        // Continue without failing the whole process
+      }
 
       let authorAssignmentSuccess = false;
-      if (!authorAssignmentResponse.ok) {
-        const errorData = await authorAssignmentResponse.json();
-        console.error("Author assignment failed:", errorData);
-
-        // Log warning but don't fail the entire process
-        console.warn(
-          "Publication was saved but author assignment failed:",
-          errorData.message
-        );
-        setSubmitStatus({
-          step: "author",
-          message: `Warning: ${errorData.message}. Publication saved successfully.`,
-          isError: false,
-        });
-      } else {
-        const assignmentResult = await authorAssignmentResponse.json();
-        console.log("Main author assigned successfully:", assignmentResult);
-        authorAssignmentSuccess = true;
+      if (authorAssignmentResponse && !authorAssignmentResponse.ok) {
+        try {
+          const errorData = await authorAssignmentResponse.json();
+          console.error("Author assignment failed:", errorData);
+          setSubmitStatus({
+            step: "author",
+            message: `Warning: ${errorData.message}. Publication saved successfully.`,
+            isError: false,
+          });
+        } catch (parseError) {
+          console.warn("Failed to parse author assignment error response");
+        }
+      } else if (authorAssignmentResponse) {
+        try {
+          const assignmentResult = await authorAssignmentResponse.json();
+          console.log("Main author assigned successfully:", assignmentResult);
+          authorAssignmentSuccess = true;
+        } catch (parseError) {
+          console.warn("Failed to parse author assignment response");
+        }
       }
 
       // Step 3: Handle co-authors (if any)
@@ -388,14 +435,7 @@ export default function JournalRegistrationForm() {
           isError: false,
         });
 
-        // For now, just log co-authors since we don't have their employee IDs
         console.log("Co-authors to be processed:", form.coAuthors);
-
-        // You can implement co-author processing here when you have employee IDs
-        // This could involve:
-        // 1. Searching for co-authors by name in employee database
-        // 2. Creating a separate co-author management interface
-        // 3. Allowing manual assignment later
       }
 
       // Success!
@@ -449,7 +489,6 @@ export default function JournalRegistrationForm() {
   // Add this component to show submission status
   const SubmissionStatus = () => {
     if (!submitStatus.step) return null;
-
     return (
       <div
         className={`fixed top-4 right-4 max-w-sm p-4 rounded-lg shadow-lg z-50 ${
@@ -934,7 +973,7 @@ export default function JournalRegistrationForm() {
           {/* Submit Button */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <button
-              type="submit"
+              onClick={handleSubmit}
               className="w-full bg-gray-800 text-white py-3 px-6 rounded-lg font-medium hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
             >
               Submit Publication
