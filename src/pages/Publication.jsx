@@ -39,16 +39,6 @@ const years = Array.from(
   (_, i) => 1950 + i
 ).reverse();
 
-// Mock database for employee lookup
-const mockEmployeeDatabase = {
-  12345: { name: "Dr. John Smith", department: "6855087c6db49ddcf8a3014e" },
-  67890: {
-    name: "Prof. Sarah Johnson",
-    department: "6855087c6db49ddcf8a3014f",
-  },
-  11111: { name: "Dr. Mike Wilson", department: "6855087c6db49ddcf8a30150" },
-};
-
 export default function JournalRegistrationForm() {
   const [form, setForm] = useState({
     employeeId: "",
@@ -78,23 +68,48 @@ export default function JournalRegistrationForm() {
   const [submit, setIsSubmitting] = useState(false);
   const API_BASE_URL = "http://localhost:3000/api";
   // Auto-fill employee data when employee ID changes
-  useEffect(() => {
-    if (form.employeeId && form.employeeId.length >= 4) {
-      const employee = mockEmployeeDatabase[form.employeeId];
-      if (employee) {
-        setForm((prev) => ({
+useEffect(() => {
+  const fetchEmployeeData = async (employeeId) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/authors/employee-id?q=${employeeId}`);
+      
+      if (response.ok) {
+        const employee = await response.json();
+        console.log("Employee data fetched:", employee);
+        setForm(prev => ({
           ...prev,
-          authorName: employee.name,
-          authorDeptId: employee.department,
+          authorName: employee.authorBio.author_name,
+          authorDeptId: employee.authorBio.department,
         }));
         setIsEmployeeFound(true);
       } else {
+        // Employee not found or other error
         setIsEmployeeFound(false);
+        // Optionally clear the fields
+        setForm(prev => ({
+          ...prev,
+          authorName: '',
+          authorDeptId: '',
+        }));
       }
-    } else {
+    } catch (error) {
+      console.error('Error fetching employee data:', error);
       setIsEmployeeFound(false);
+      // Optionally clear the fields on error
+      setForm(prev => ({
+        ...prev,
+        authorName: '',
+        authorDeptId: '',
+      }));
     }
-  }, [form.employeeId]);
+  };
+
+  if (form.employeeId && form.employeeId.length >= 4) {
+    fetchEmployeeData(form.employeeId);
+  } else {
+    setIsEmployeeFound(false);
+  }
+}, [form.employeeId]);
 
   const validate = () => {
     const newErrors = {};
