@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Lock, X, Building, Users, User } from 'lucide-react';
+import ApiService from '../utils/apiService';
 
 const AuthenticationModal = ({ isOpen, onClose, onAuthenticate }) => {
   const [employeeId, setEmployeeId] = useState('');
@@ -52,15 +53,42 @@ const AuthenticationModal = ({ isOpen, onClose, onAuthenticate }) => {
       return;
     }
 
-    setTimeout(() => {
-      onAuthenticate({
+    try {
+      // Check if author exists in the database
+      const authorCheck = await ApiService.checkAuthorExists(employeeId);
+      
+      let userInfo = {
         employeeId: parseInt(employeeId),
         accessLevel,
-        accessLevelLabel: selectedLevel.label
-      });
+        accessLevelLabel: selectedLevel.label,
+        authorExists: authorCheck.exists
+      };
+
+      // If author exists, add their bio information
+      if (authorCheck.exists && authorCheck.authorBio) {
+        userInfo = {
+          ...userInfo,
+          authorName: authorCheck.authorBio.author_name,
+          department: authorCheck.authorBio.department
+        };
+      }
+
+      // For author level access, ensure the author exists
+      if (accessLevel === 'author' && !authorCheck.exists) {
+        setError('Author not found with this employee ID. Please contact administrator.');
+        setLoading(false);
+        return;
+      }
+
+      // Authentication successful
+      onAuthenticate(userInfo);
       setLoading(false);
       onClose();
-    }, 1000);
+      
+    } catch (error) {
+      setError(error.message || 'Authentication failed. Please try again.');
+      setLoading(false);
+    }
   };
 
   const resetForm = () => {
