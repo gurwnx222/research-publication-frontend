@@ -1,4 +1,3 @@
-import React from "react";
 import { useState, useEffect } from "react";
 import Sidebar from "../components/Sidebar";
 import DashboardHeader from "../components/ui/DashboardHeader";
@@ -31,6 +30,8 @@ export default function Users() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   // Departments state for the modal
+  //add ids of departments as needed
+  // This is a placeholder; you can fetch this from your API later
   const [departments, setDepartments] = useState([
     { _id: "68730916eafef491d5e45f8c", name: "Computer Science Engineering" },
   ]);
@@ -166,7 +167,7 @@ export default function Users() {
   // Handle user deletion
   const handleDeleteUser = async (userId) => {
     try {
-      const response = await fetch(`${BASE_URL}/private-data/users/${userId}`, {
+      const response = await fetch(`${BASE_URL}/private-data/delete/author/${userId}`, {
         method: "DELETE",
         credentials: "include", // Added credentials
       });
