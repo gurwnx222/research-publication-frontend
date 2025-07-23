@@ -23,23 +23,13 @@ const CreateAuthorModal = ({
   const [formData, setFormData] = useState({
     employee_id: "",
     author_name: "",
-    email: "",
     password: "",
-    role: "Researcher",
     department: "",
     isActive: true,
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-
-  const roleOptions = [
-    "Associate Professor",
-    "Assistant Professor",
-    "Professor",
-    "Researcher",
-    "Technical Staff",
-  ];
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -63,9 +53,7 @@ const CreateAuthorModal = ({
       setFormData({
         employee_id: "",
         author_name: "",
-        email: "",
         password: "",
-        role: "Researcher",
         department: "",
         isActive: true,
       });
@@ -160,26 +148,6 @@ const CreateAuthorModal = ({
             </p>
           </div>
 
-          {/* Email */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              <Mail className="w-4 h-4 inline mr-1" />
-              Email Address *
-            </label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
-              placeholder="e.g., john.smith@university.edu"
-            />
-            <p className="mt-1 text-xs text-gray-500">
-              Must be a valid email address and unique in the system
-            </p>
-          </div>
-
           {/* Password - FIXED: Added show/hide toggle like admin modal */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -220,32 +188,8 @@ const CreateAuthorModal = ({
             </p>
           </div>
 
-          {/* Role and Department Grid */}
+          {/*Department Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Role */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                <Briefcase className="w-4 h-4 inline mr-1" />
-                Role *
-              </label>
-              <select
-                name="role"
-                value={formData.role}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
-              >
-                {roleOptions.map((role) => (
-                  <option key={role} value={role}>
-                    {role}
-                  </option>
-                ))}
-              </select>
-              <p className="mt-1 text-xs text-gray-500">
-                Academic or professional role
-              </p>
-            </div>
-
             {/* Department */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
