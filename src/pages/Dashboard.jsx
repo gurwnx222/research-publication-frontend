@@ -45,14 +45,14 @@ const Dashboard = () => {
       if (!response.ok) {
         if (response.status === 401) {
           // Handle unauthorized - redirect to login
-          window.location.href = '/home';
+          window.location.href = '/';
           return;
         }
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
-      const publicationsData = data.publications || [];
+      const publicationsData = data?.publications || "error getting publications";
       console.log("Fetched publications:", data);
       setPublications(publicationsData);
 
@@ -71,7 +71,7 @@ const Dashboard = () => {
       if (!statsResponse.ok) {
         if (statsResponse.status === 401) {
           // Handle unauthorized - redirect to login
-          window.location.href = '/login';
+          window.location.href = '/';
           return;
         }
         throw new Error(`HTTP error! status: ${statsResponse.status}`);
@@ -80,9 +80,9 @@ const Dashboard = () => {
       const statsData = await statsResponse.json();
       console.log("Fetched stats:", statsData);
       setStats({
-        users: statsData.counts.users || 0,
-        authors: statsData.counts.authors || 0,
-        departments: statsData.counts.departments || 0,
+        users: statsData?.counts?.users || 0,
+        authors: statsData?.counts?.authors || 0,
+        departments: statsData?.counts?.departments || 0,
       });
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -117,12 +117,6 @@ const Dashboard = () => {
 
   // Stats cards configuration
   const statsConfig = [
-    {
-      title: "Total Users",
-      count: stats.users,
-      icon: Users,
-      iconColor: "text-blue-500",
-    },
     {
       title: "Active Authors",
       count: stats.authors,
