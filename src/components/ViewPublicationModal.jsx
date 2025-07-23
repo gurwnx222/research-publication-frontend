@@ -5,60 +5,80 @@ const Publication = ({ publication, onDownload, onViewPdf }) => {
   const {
     id,
     title,
-    author,
+    authorName,
     coAuthors = [],
-    isbn,
-    issn,
-    year,
+    authors = [],
+    isbnIssn,
+    formattedPublicationDate,
+    publicationYear,
     journalName,
-    pdfUrl,
+    journalType,
+    file_url,
     department,
-    abstract,
-    keywords = []
+    authorDeptId
   } = publication;
 
   // DEBUG: Add logging to identify the problematic field
   console.log('Publication debug data:', {
     id: typeof id === 'object' ? JSON.stringify(id) : id,
-    author: typeof author === 'object' ? JSON.stringify(author) : author,
-    coAuthors: coAuthors.map(ca => typeof ca === 'object' ? JSON.stringify(ca) : ca),
-    department: typeof department === 'object' ? JSON.stringify(department) : department,
+    authorName: typeof authorName === 'object' ? JSON.stringify(authorName) : authorName,
+    authors: authors,
+    department: department,
+    authorDeptId: typeof authorDeptId === 'object' ? JSON.stringify(authorDeptId) : authorDeptId,
     journalName: typeof journalName === 'object' ? JSON.stringify(journalName) : journalName,
-    keywords: keywords.map(kw => typeof kw === 'object' ? JSON.stringify(kw) : kw)
+    journalType: journalType,
+    formattedPublicationDate: formattedPublicationDate,
+    publicationYear: publicationYear,
+    isbnIssn: isbnIssn,
+    file_url: file_url
   });
 
-  // Helper function to safely render potentially object values
-  const renderValue = (value, fallback = 'N/A') => {
-    if (value === null || value === undefined) return fallback;
-    if (typeof value === 'object') {
-      // If it's an object with name property, use that
-      if (value.name) return value.name;
-      // Otherwise, stringify it for debugging
-      return JSON.stringify(value);
+  // Helper function to get department name
+  const getDepartmentName = () => {
+    if (department && department.name) {
+      return department.name;
     }
-    return String(value);
+    // Create dummy department names based on common department IDs
+    const deptMap = {
+      'CSE': 'Department of Computer Science',
+      'ECE': 'Department of Electronics and Communication',
+      'ME': 'Department of Mechanical Engineering',
+      'CE': 'Department of Civil Engineering',
+      'IT': 'Department of Information Technology'
+    };
+    
+    // If authorDeptId exists, try to match it with department mapping
+    if (authorDeptId) {
+      const deptId = typeof authorDeptId === 'object' ? authorDeptId.toString() : authorDeptId;
+      return deptMap[deptId] || `Department (ID: ${deptId})`;
+    }
+    
+    return 'Department not specified';
   };
 
-  // Helper function to safely render array of potentially object values
-  const renderArray = (arr, fallback = []) => {
-    if (!Array.isArray(arr)) return fallback;
-    return arr.map(item => {
-      if (typeof item === 'object') {
-        return item.name || JSON.stringify(item);
-      }
-      return String(item);
-    });
+  // Helper function to get co-authors from authors array
+  const getCoAuthors = () => {
+    if (authors && Array.isArray(authors) && authors.length > 0) {
+      // Filter out the main author and return co-authors
+      return authors.filter(author => author.name !== authorName).map(author => author.name || author);
+    }
+    return coAuthors || [];
+  };
+
+  // Helper function to get publication year
+  const getPublicationYear = () => {
+    return formattedPublicationDate || publicationYear || 'N/A';
   };
 
   const handleDownload = () => {
-    if (pdfUrl) {
-      onDownload(pdfUrl, `${title}.pdf`);
+    if (file_url) {
+      onDownload(file_url, `${title}.pdf`);
     }
   };
 
   const handleViewPdf = () => {
-    if (pdfUrl) {
-      onViewPdf(pdfUrl);
+    if (file_url) {
+      onViewPdf(file_url);
     }
   };
 
@@ -68,11 +88,6 @@ const Publication = ({ publication, onDownload, onViewPdf }) => {
         <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
           {title}
         </h3>
-        {abstract && (
-          <p className="text-sm text-gray-600 mb-3 line-clamp-3">
-            {abstract}
-          </p>
-        )}
       </div>
 
       <div className="space-y-3 mb-6">
@@ -81,12 +96,12 @@ const Publication = ({ publication, onDownload, onViewPdf }) => {
           <div className="flex-1">
             <div className="text-sm">
               <span className="font-medium text-gray-900">Author: </span>
-              <span className="text-gray-700">{renderValue(author)}</span>
+              <span className="text-gray-700">{authorName || 'N/A'}</span>
             </div>
-            {coAuthors.length > 0 && (
+            {getCoAuthors().length > 0 && (
               <div className="text-sm mt-1">
                 <span className="font-medium text-gray-900">Co-authors: </span>
-                <span className="text-gray-700">{renderArray(coAuthors).join(', ')}</span>
+                <span className="text-gray-700">{getCoAuthors().join(', ')}</span>
               </div>
             )}
           </div>
@@ -96,63 +111,48 @@ const Publication = ({ publication, onDownload, onViewPdf }) => {
           <Book className="w-4 h-4 text-gray-500 flex-shrink-0" />
           <div className="text-sm">
             <span className="font-medium text-gray-900">Journal: </span>
-            <span className="text-gray-700">{renderValue(journalName)}</span>
+            <span className="text-gray-700">{journalName || 'N/A'}</span>
           </div>
         </div>
+
+        {journalType && (
+          <div className="flex items-center space-x-2">
+            <Book className="w-4 h-4 text-gray-500 flex-shrink-0" />
+            <div className="text-sm">
+              <span className="font-medium text-gray-900">Journal Type: </span>
+              <span className="text-gray-700">{journalType}</span>
+            </div>
+          </div>
+        )}
 
         <div className="flex items-center space-x-2">
           <Calendar className="w-4 h-4 text-gray-500 flex-shrink-0" />
           <div className="text-sm">
             <span className="font-medium text-gray-900">Year: </span>
-            <span className="text-gray-700">{renderValue(year)}</span>
+            <span className="text-gray-700">{getPublicationYear()}</span>
           </div>
         </div>
 
-        {(isbn || issn) && (
+        {isbnIssn && (
           <div className="flex items-center space-x-2">
             <Hash className="w-4 h-4 text-gray-500 flex-shrink-0" />
             <div className="text-sm">
-              {isbn && (
-                <span className="text-gray-700 mr-4">
-                  <span className="font-medium text-gray-900">ISBN: </span>
-                  {renderValue(isbn)}
-                </span>
-              )}
-              {issn && (
-                <span className="text-gray-700">
-                  <span className="font-medium text-gray-900">ISSN: </span>
-                  {renderValue(issn)}
-                </span>
-              )}
+              <span className="font-medium text-gray-900">ISBN/ISSN: </span>
+              <span className="text-gray-700">{isbnIssn}</span>
             </div>
           </div>
         )}
 
-        {department && (
-          <div className="text-sm">
-            <span className="font-medium text-gray-900">Department: </span>
-            <span className="text-gray-700">{renderValue(department)}</span>
-          </div>
-        )}
-
-        {keywords.length > 0 && (
-          <div className="flex flex-wrap gap-1 mt-2">
-            {renderArray(keywords).map((keyword, index) => (
-              <span
-                key={index}
-                className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full"
-              >
-                {keyword}
-              </span>
-            ))}
-          </div>
-        )}
+        <div className="text-sm">
+          <span className="font-medium text-gray-900">Department: </span>
+          <span className="text-gray-700">{getDepartmentName()}</span>
+        </div>
       </div>
 
       <div className="flex space-x-3 pt-4 border-t border-gray-200">
         <button
           onClick={handleViewPdf}
-          disabled={!pdfUrl}
+          disabled={!file_url}
           className="flex items-center space-x-2 px-4 py-2 bg-gray-900 text-white rounded-md hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
         >
           <Eye className="w-4 h-4" />
@@ -161,7 +161,7 @@ const Publication = ({ publication, onDownload, onViewPdf }) => {
         
         <button
           onClick={handleDownload}
-          disabled={!pdfUrl}
+          disabled={!file_url}
           className="flex items-center space-x-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
         >
           <Download className="w-4 h-4" />
@@ -170,7 +170,7 @@ const Publication = ({ publication, onDownload, onViewPdf }) => {
       </div>
 
       <div className="mt-3 pt-3 border-t border-gray-100">
-        <p className="text-xs text-gray-500">Publication ID: {renderValue(id)}</p>
+        <p className="text-xs text-gray-500">Publication ID: {id || 'N/A'}</p>
       </div>
     </div>
   );
