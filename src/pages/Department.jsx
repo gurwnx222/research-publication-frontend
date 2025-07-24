@@ -100,17 +100,14 @@ const CreateDepartmentModal = ({ isOpen, onClose, onSubmit }) => {
     setIsLoading(true);
     const BASE_URL = "http://localhost:3000/api";
     try {
-      const response = await fetch(
-        `${BASE_URL}/register/department`,
-        {
-          method: "POST",
-          credentials: "include", 
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData),
-        }
-      );
+      const response = await fetch(`${BASE_URL}/register/department`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -280,12 +277,12 @@ const DepartmentDashboard = () => {
   // ADDED: Function to determine active tab from current route
   const getActiveTabFromRoute = (pathname) => {
     const routeToTab = {
-      '/dashboard': 'dashboard',
-      '/authors': 'authors', 
-      '/department': 'departments',
-      '/admins': 'admins'
+      "/dashboard": "dashboard",
+      "/authors": "authors",
+      "/department": "departments",
+      "/admins": "admins",
     };
-    return routeToTab[pathname] || 'departments'; // Default to 'departments' for this page
+    return routeToTab[pathname] || "departments"; // Default to 'departments' for this page
   };
 
   // ADDED: Derive activeTab from current route
@@ -326,15 +323,13 @@ const DepartmentDashboard = () => {
   const fetchDepartments = async () => {
     setIsLoadingDepartments(true);
     try {
-      const response = await fetch(
-        `${BASE_URL}/private-data/departments`, {
-          method: "GET",
-          credentials: "include", // Include credentials for session management
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await fetch(`${BASE_URL}/private-data/departments`, {
+        method: "GET",
+        credentials: "include", // Include credentials for session management
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -361,15 +356,13 @@ const DepartmentDashboard = () => {
   const fetchDepartmentCount = async () => {
     setIsLoadingCount(true);
     try {
-      const response = await fetch(
-        `${BASE_URL}/private-data/counts`, {
-          method: "GET",
-          credentials: "include", // Include credentials for session management
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await fetch(`${BASE_URL}/private-data/counts`, {
+        method: "GET",
+        credentials: "include", // Include credentials for session management
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -393,12 +386,18 @@ const DepartmentDashboard = () => {
     if (window.confirm("Are you sure you want to delete this department?")) {
       try {
         const response = await fetch(
-          `http://localhost:3000/api/department/${id}`,
+          "http://localhost:3000/api/private-data/delete/department/",
           {
             method: "DELETE",
+            credentials: "include",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ department_id: id }),
           }
         );
-
+        console.log("Deleting department with ID:", id);
+        console.log("Response:", response);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -501,7 +500,10 @@ const DepartmentDashboard = () => {
                   </div>
                 ) : (
                   <div className="bg-white rounded-2xl p-12 text-center shadow-sm border border-gray-100">
-                    <Building2 size={48} className="mx-auto text-gray-400 mb-4" />
+                    <Building2
+                      size={48}
+                      className="mx-auto text-gray-400 mb-4"
+                    />
                     <h3 className="text-xl font-semibold text-gray-900 mb-2">
                       No departments yet
                     </h3>

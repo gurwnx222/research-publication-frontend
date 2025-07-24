@@ -29,20 +29,8 @@ function App() {
           />
 
           {/* Protected Routes */}
-          <Route
-            path="/dashboard"
-            element={
-             <Dashboard />
-            }
-          />
-          <Route
-            path="/department"
-            element={
-              <ProtectedRoute>
-                <Department />
-              </ProtectedRoute>
-            }
-          />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/department" element={<Department />} />
           <Route path="/authors" element={<Users />} />
           <Route
             path="/admins"
