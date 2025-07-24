@@ -13,16 +13,6 @@ const UserCard = ({ user, onDelete }) => {
     });
   };
 
-  const getRoleColor = (role) => {
-    const colors = {
-      Professor: "bg-purple-100 text-purple-700",
-      "Associate Professor": "bg-blue-100 text-blue-700",
-      "Assistant Professor": "bg-green-100 text-green-700",
-      Lecturer: "bg-orange-100 text-orange-700",
-    };
-    return colors[role] || "bg-gray-100 text-gray-700";
-  };
-
   return (
     <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200">
       <div className="flex items-start justify-between mb-4">
@@ -63,16 +53,16 @@ const UserCard = ({ user, onDelete }) => {
       <div className="space-y-2 mb-4">
         <div className="flex items-center space-x-2 text-sm text-gray-600">
           <Mail size={14} />
-          <span>{user.email}</span>
+          <span>Employee ID: {user.employee_id}</span>
         </div>
         <div className="flex items-center space-x-2">
           <Badge size={14} className="text-gray-400" />
           <span
-            className={`px-2 py-1 rounded-lg text-xs font-medium ${getRoleColor(
-              user.role
-            )}`}
+            className={
+              "px-2 py-1 rounded-lg text-xs font-medium bg-blue-100 text-blue-700"
+            }
           >
-            {user.role}
+            Author: {user.author_name}
           </span>
         </div>
       </div>
