@@ -82,8 +82,7 @@ export default function Users() {
           throw new Error("Failed to fetch stats");
         }
         const stats = await statsResponse.json();
-
-        setTotalUsers(stats?.counts?.users || 0);
+        setTotalUsers(stats?.counts?.authors || 0);
       } catch (error) {
         console.error("Error fetching stats:", error);
       }
@@ -167,10 +166,13 @@ export default function Users() {
   // Handle user deletion
   const handleDeleteUser = async (userId) => {
     try {
-      const response = await fetch(`${BASE_URL}/private-data/delete/author/${userId}`, {
-        method: "DELETE",
-        credentials: "include", // Added credentials
-      });
+      const response = await fetch(
+        `${BASE_URL}/private-data/delete/author/${userId}`,
+        {
+          method: "DELETE",
+          credentials: "include", // Added credentials
+        }
+      );
 
       if (response.ok) {
         // Refresh the current page after deletion
