@@ -43,7 +43,7 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route path="/users" element={<Users />} />
+          <Route path="/authors" element={<Users />} />
           <Route
             path="/admins"
             element={

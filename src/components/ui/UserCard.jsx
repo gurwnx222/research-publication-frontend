@@ -2,8 +2,6 @@ import React from "react";
 import { Trash2, User, Mail, Badge, Calendar } from "lucide-react";
 
 const UserCard = ({ user, onDelete }) => {
-  // Fetch user list from the API
-  const BASE_URL = "http://localhost:3000/api";
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -42,7 +40,8 @@ const UserCard = ({ user, onDelete }) => {
             {user.isActive ? "Active" : "Inactive"}
           </span>
           <button
-            onClick={() => onDelete(user._id)}
+            onClick={() => onDelete(user.employee_id
+)}
             className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors duration-200"
           >
             <Trash2 size={18} />

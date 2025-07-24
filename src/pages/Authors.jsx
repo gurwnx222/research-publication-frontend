@@ -165,15 +165,18 @@ export default function Users() {
 
   // Handle user deletion
   const handleDeleteUser = async (userId) => {
-    try {
-      const response = await fetch(
-        `${BASE_URL}/private-data/delete/author/${userId}`,
-        {
-          method: "DELETE",
-          credentials: "include", // Added credentials
-        }
-      );
-
+   try {
+    const response = await fetch(
+      `${BASE_URL}/private-data/delete/unassigned-author`,
+      {
+        method: "DELETE",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ employee_id: userId })
+      }
+    );
       if (response.ok) {
         // Refresh the current page after deletion
         fetchUsers(pagination.currentPage, searchTerm);
@@ -264,7 +267,7 @@ export default function Users() {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 px-6">
-          <StatsCard title="Total Users" count={totalUsers} icon={UsersIcon} />
+          <StatsCard title="Total Authors" count={totalUsers} icon={UsersIcon} />
         </div>
 
         {/* Users Grid */}

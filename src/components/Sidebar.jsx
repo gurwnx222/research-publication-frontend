@@ -20,7 +20,7 @@ const Sidebar = ({ isOpen, onClose, activeTab = "dashboard", onTabChange }) => {
   // Menu items configuration with admin route added
   const menuItems = [
     { id: "dashboard", label: "Dashboard", icon: Home },
-    { id: "users", label: "Users", icon: User },
+    { id: "authors", label: "Authors", icon: User },
     { id: "departments", label: "Departments", icon: Building },
     { id: "admins", label: "Admins", icon: Shield },
   ];
@@ -32,7 +32,7 @@ const Sidebar = ({ isOpen, onClose, activeTab = "dashboard", onTabChange }) => {
     const pathMap = {
       dashboard: "/dashboard",
       departments: "/department",
-      users: "/users",
+      authors: "/authors",
       admins: "/admins",
     };
 
