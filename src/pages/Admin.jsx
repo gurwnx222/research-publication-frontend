@@ -1,5 +1,6 @@
 import React from "react";
 import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom"; // Add this import
 import Sidebar from "../components/Sidebar";
 import AdminsGrid from "../components/ui/AdminsGrid";
 import CreateAdminModal from "../components/CreateAdminModal";
@@ -9,6 +10,24 @@ import { Shield } from "lucide-react";
 
 export default function Admins() {
   const BASE_URL = "http://localhost:3000/api";
+  const location = useLocation(); // Add this hook
+
+  // ADDED: Sidebar state management
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // ADDED: Function to determine active tab from current route
+  const getActiveTabFromRoute = (pathname) => {
+    const routeToTab = {
+      '/dashboard': 'dashboard',
+      '/authors': 'authors', 
+      '/department': 'departments',
+      '/admins': 'admins'
+    };
+    return routeToTab[pathname] || 'admins'; // Default to 'admins' for this page
+  };
+
+  // ADDED: Derive activeTab from current route
+  const activeTab = getActiveTabFromRoute(location.pathname);
 
   // Stats state
   const [totalAdmins, setTotalAdmins] = useState(0);
@@ -27,6 +46,20 @@ export default function Admins() {
 
   // Modal state - only for admin creation
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
+  // ADDED: Sidebar handlers
+  const handleSidebarClose = () => {
+    setSidebarOpen(false);
+  };
+
+  const handleMenuClick = () => {
+    setSidebarOpen(true);
+  };
+
+  const handleTabChange = (tabId) => {
+    console.log(`🔄 Admins page - Tab change requested: ${tabId}`);
+    // The navigation will be handled by Sidebar component
+  };
 
   // Fetch stats data
   useEffect(() => {
@@ -197,8 +230,13 @@ export default function Admins() {
 
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
-      {/* Sidebar */}
-      <Sidebar />
+      {/* UPDATED: Sidebar with proper props */}
+      <Sidebar
+        isOpen={sidebarOpen}
+        onClose={handleSidebarClose}
+        activeTab={activeTab} // Now properly synced with route
+        onTabChange={handleTabChange}
+      />
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col lg:ml-0">
@@ -223,6 +261,7 @@ export default function Admins() {
             onDelete={handleDeleteAdmin}
             onPageChange={handlePageChange}
             onCreateAdmin={handleCreateAdmin}
+            onMenuClick={handleMenuClick} // ADDED: Pass menu click handler
           />
         </main>
       </div>

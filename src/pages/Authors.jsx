@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom"; // Add this import
 import Sidebar from "../components/Sidebar";
 import DashboardHeader from "../components/ui/DashboardHeader";
 import SearchBar from "../components/SearchBar";
@@ -10,6 +11,24 @@ import { Users as UsersIcon } from "lucide-react";
 
 export default function Users() {
   const BASE_URL = "http://localhost:3000/api";
+  const location = useLocation(); // Add this hook
+
+  // FIXED: Add sidebar state management
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // FIXED: Function to determine active tab from current route
+  const getActiveTabFromRoute = (pathname) => {
+    const routeToTab = {
+      '/dashboard': 'dashboard',
+      '/authors': 'authors', 
+      '/department': 'departments',
+      '/admins': 'admins'
+    };
+    return routeToTab[pathname] || 'authors'; // Default to 'authors' for this page
+  };
+
+  // FIXED: Derive activeTab from current route
+  const activeTab = getActiveTabFromRoute(location.pathname);
 
   // Stats state
   const [totalUsers, setTotalUsers] = useState(0);
@@ -35,6 +54,20 @@ export default function Users() {
   const [departments, setDepartments] = useState([
     { _id: "68730916eafef491d5e45f8c", name: "Computer Science Engineering" },
   ]);
+
+  // FIXED: Add sidebar handlers
+  const handleSidebarClose = () => {
+    setSidebarOpen(false);
+  };
+
+  const handleMenuClick = () => {
+    setSidebarOpen(true);
+  };
+
+  const handleTabChange = (tabId) => {
+    console.log(`🔄 Authors page - Tab change requested: ${tabId}`);
+    // The navigation will be handled by Sidebar component
+  };
 
   // Fetch departments (you can implement this later)
   useEffect(() => {
@@ -249,13 +282,18 @@ export default function Users() {
 
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
-      {/* Sidebar */}
-      <Sidebar />
+      {/* FIXED: Sidebar with proper props */}
+      <Sidebar
+        isOpen={sidebarOpen}
+        onClose={handleSidebarClose}
+        activeTab={activeTab} // Now properly synced with route
+        onTabChange={handleTabChange}
+      />
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col lg:ml-0">
-        {/* Header */}
-        <DashboardHeader onCreateUser={handleCreateUser} />
+        {/* FIXED: Header with menu click handler */}
+        <DashboardHeader onCreateUser={handleCreateUser} onMenuClick={handleMenuClick} />
 
         {/* Search Bar */}
         <div className="px-6">

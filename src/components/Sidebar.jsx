@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Home, User, Building, X, LogOut, Shield } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from '../context/AuthContext'; // Adjust path as needed
@@ -26,8 +26,13 @@ const Sidebar = ({ isOpen, onClose, activeTab = "dashboard", onTabChange }) => {
   ];
 
   const handleTabClick = (tabId) => {
+    // Update internal state immediately
     setCurrentTab(tabId);
-    if (onTabChange) onTabChange(tabId);
+    
+    // Call parent callback
+    if (onTabChange) {
+      onTabChange(tabId);
+    }
 
     const pathMap = {
       dashboard: "/dashboard",
@@ -37,9 +42,12 @@ const Sidebar = ({ isOpen, onClose, activeTab = "dashboard", onTabChange }) => {
     };
 
     const target = pathMap[tabId];
-    if (target) navigate(target);
+    if (target) {
+      navigate(target);
+    }
 
     if (window.innerWidth < 1024) {
+      console.log('📱 Mobile detected, closing sidebar');
       onClose();
     }
   };
@@ -57,25 +65,30 @@ const Sidebar = ({ isOpen, onClose, activeTab = "dashboard", onTabChange }) => {
     }
   };
 
-  // Menu item component
-  const MenuItem = ({ item }) => (
-    <li key={item.id}>
-      <button
-        onClick={() => handleTabClick(item.id)}
-        className={`
-          w-full flex items-center px-4 py-3 rounded-lg transition-all duration-200 text-left
-          ${
-            currentTab === item.id
-              ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg transform scale-105"
-              : "text-gray-700 hover:bg-gray-50 hover:shadow-md hover:transform hover:scale-102"
-          }
-        `}
-      >
-        <item.icon className="w-5 h-5 mr-3" />
-        {item.label}
-      </button>
-    </li>
-  );
+  // Menu item component with debug logging
+  const MenuItem = ({ item }) => {
+    const isActive = currentTab === item.id;
+    return (
+      <li key={item.id}>
+        <button
+          onClick={() => handleTabClick(item.id)}
+          className={`
+            w-full flex items-center px-4 py-3 rounded-lg transition-all duration-200 text-left
+            ${
+              isActive
+                ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg transform scale-105"
+                : "text-gray-700 hover:bg-gray-50 hover:shadow-md hover:transform hover:scale-102"
+            }
+          `}
+        >
+          <item.icon className="w-5 h-5 mr-3" />
+          {item.label}
+          {/* DEBUG: Show active state visually */}
+          {isActive && <span className="ml-auto text-xs">●</span>}
+        </button>
+      </li>
+    );
+  };
 
   return (
     <>
@@ -108,6 +121,10 @@ const Sidebar = ({ isOpen, onClose, activeTab = "dashboard", onTabChange }) => {
                 Research Publication
               </h2>
               <p className="text-sm text-gray-500 mt-1">Navigation Panel</p>
+              {/* DEBUG: Show current state in header */}
+              <p className="text-xs text-gray-400 mt-1">
+                Active: {currentTab} | Prop: {activeTab}
+              </p>
             </div>
             <button
               onClick={onClose}

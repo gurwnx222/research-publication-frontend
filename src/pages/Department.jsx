@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom"; // Add this import
 import {
   Trash2,
   Plus,
@@ -270,12 +271,52 @@ const CreateDepartmentModal = ({ isOpen, onClose, onSubmit }) => {
 };
 
 const DepartmentDashboard = () => {
+  const BASE_URL = "http://localhost:3000/api";
+  const location = useLocation(); // Add this hook
+
+  // ADDED: Add sidebar state management
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // ADDED: Function to determine active tab from current route
+  const getActiveTabFromRoute = (pathname) => {
+    const routeToTab = {
+      '/dashboard': 'dashboard',
+      '/authors': 'authors', 
+      '/department': 'departments',
+      '/admins': 'admins'
+    };
+    return routeToTab[pathname] || 'departments'; // Default to 'departments' for this page
+  };
+
+  // ADDED: Derive activeTab from current route
+  const activeTab = getActiveTabFromRoute(location.pathname);
+
   const [departments, setDepartments] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
   const [isLoadingCount, setIsLoadingCount] = useState(true);
   const [isLoadingDepartments, setIsLoadingDepartments] = useState(true);
-  const BASE_URL = "http://localhost:3000/api";
+
+  // ADDED: Add sidebar handlers
+  const handleSidebarClose = () => {
+    setSidebarOpen(false);
+  };
+
+  const handleMenuClick = () => {
+    setSidebarOpen(true);
+  };
+
+  const handleTabChange = (tabId) => {
+    console.log(`🔄 Department page - Tab change requested: ${tabId}`);
+    // The navigation will be handled by Sidebar component
+  };
+
+  // ADDED: Handle create department from header
+  const handleCreateDepartment = () => {
+    console.log("Create department button clicked!"); // Debug log
+    setIsModalOpen(true);
+  };
+
   // Fetch departments and count on component mount
   useEffect(() => {
     fetchDepartments();
@@ -375,7 +416,7 @@ const DepartmentDashboard = () => {
     }
   };
 
-  const handleCreateDepartment = (result) => {
+  const handleCreateDepartmentSubmit = (result) => {
     // Add the new department to local state
     if (result.department) {
       setDepartments((prev) => [result.department, ...prev]);
@@ -390,92 +431,102 @@ const DepartmentDashboard = () => {
 
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
-      {/* Sidebar */}
-      <Sidebar />
-      <div className="flex-1 p-8">
-        <div className="max-w-7xl mx-auto">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                Departments
-              </h1>
-              <p className="text-gray-600">
-                Manage your university departments
-              </p>
-            </div>
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white rounded-xl font-medium transition-all duration-200 shadow-lg hover:shadow-xl"
-            >
-              <Plus size={20} />
-              <span>New Department</span>
-            </button>
-          </div>
+      {/* UPDATED: Sidebar with proper props */}
+      <Sidebar
+        isOpen={sidebarOpen}
+        onClose={handleSidebarClose}
+        activeTab={activeTab} // Now properly synced with route
+        onTabChange={handleTabChange}
+      />
 
-          {/* Stats Card */}
-          <div className="mb-8">
-            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 max-w-sm">
-              <div className="flex items-center space-x-3">
-                <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                  <Building2 className="text-blue-600" size={24} />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Total Departments</p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {isLoadingCount ? "..." : totalCount}
-                  </p>
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col lg:ml-0">
+        {/* Main Content */}
+        <div className="flex-1 p-8">
+          <div className="max-w-7xl mx-auto">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                  Departments
+                </h1>
+                <p className="text-gray-600">
+                  Manage your university departments
+                </p>
+              </div>
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white rounded-xl font-medium transition-all duration-200 shadow-lg hover:shadow-xl"
+              >
+                <Plus size={20} />
+                <span>New Department</span>
+              </button>
+            </div>
+
+            {/* Stats Card */}
+            <div className="mb-8">
+              <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 max-w-sm">
+                <div className="flex items-center space-x-3">
+                  <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                    <Building2 className="text-blue-600" size={24} />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600">Total Departments</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {isLoadingCount ? "..." : totalCount}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
+
+            {/* Loading State */}
+            {isLoadingDepartments ? (
+              <div className="bg-white rounded-2xl p-12 text-center shadow-sm border border-gray-100">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+                <p className="text-gray-600">Loading departments...</p>
+              </div>
+            ) : (
+              <>
+                {/* Departments Grid */}
+                {departments.length > 0 ? (
+                  <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                    {departments.map((department) => (
+                      <DepartmentCard
+                        key={department._id}
+                        department={department}
+                        onDelete={handleDelete}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="bg-white rounded-2xl p-12 text-center shadow-sm border border-gray-100">
+                    <Building2 size={48} className="mx-auto text-gray-400 mb-4" />
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                      No departments yet
+                    </h3>
+                    <p className="text-gray-600 mb-6">
+                      Get started by creating your first department
+                    </p>
+                    <button
+                      onClick={() => setIsModalOpen(true)}
+                      className="inline-flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white rounded-xl font-medium transition-all duration-200"
+                    >
+                      <Plus size={20} />
+                      <span>Create Department</span>
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* Create Department Modal */}
+            <CreateDepartmentModal
+              isOpen={isModalOpen}
+              onClose={() => setIsModalOpen(false)}
+              onSubmit={handleCreateDepartmentSubmit}
+            />
           </div>
-
-          {/* Loading State */}
-          {isLoadingDepartments ? (
-            <div className="bg-white rounded-2xl p-12 text-center shadow-sm border border-gray-100">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-              <p className="text-gray-600">Loading departments...</p>
-            </div>
-          ) : (
-            <>
-              {/* Departments Grid */}
-              {departments.length > 0 ? (
-                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {departments.map((department) => (
-                    <DepartmentCard
-                      key={department._id}
-                      department={department}
-                      onDelete={handleDelete}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <div className="bg-white rounded-2xl p-12 text-center shadow-sm border border-gray-100">
-                  <Building2 size={48} className="mx-auto text-gray-400 mb-4" />
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                    No departments yet
-                  </h3>
-                  <p className="text-gray-600 mb-6">
-                    Get started by creating your first department
-                  </p>
-                  <button
-                    onClick={() => setIsModalOpen(true)}
-                    className="inline-flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white rounded-xl font-medium transition-all duration-200"
-                  >
-                    <Plus size={20} />
-                    <span>Create Department</span>
-                  </button>
-                </div>
-              )}
-            </>
-          )}
-
-          {/* Create Department Modal */}
-          <CreateDepartmentModal
-            isOpen={isModalOpen}
-            onClose={() => setIsModalOpen(false)}
-            onSubmit={handleCreateDepartment}
-          />
         </div>
       </div>
     </div>
