@@ -1,22 +1,22 @@
 import { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom"; // Add this import
+import { useLocation } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import DashboardHeader from "../components/ui/DashboardHeader";
 import SearchBar from "../components/SearchBar";
 import UsersGrid from "../components/ui/UsersGrid";
-import CreateAuthorModal from "../components/CreateAuthorModal"; // Updated import
+import CreateAuthorModal from "../components/CreateAuthorModal";
 import StatsCard from "../components/StatsCard";
 import "../App.css";
 import { Users as UsersIcon } from "lucide-react";
 
 export default function Users() {
   const BASE_URL = "http://localhost:3000/api";
-  const location = useLocation(); // Add this hook
+  const location = useLocation();
 
-  // FIXED: Add sidebar state management
+  // Sidebar state management
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // FIXED: Function to determine active tab from current route
+  // Function to determine active tab from current route
   const getActiveTabFromRoute = (pathname) => {
     const routeToTab = {
       '/dashboard': 'dashboard',
@@ -24,10 +24,10 @@ export default function Users() {
       '/department': 'departments',
       '/admins': 'admins'
     };
-    return routeToTab[pathname] || 'authors'; // Default to 'authors' for this page
+    return routeToTab[pathname] || 'authors';
   };
 
-  // FIXED: Derive activeTab from current route
+  // Derive activeTab from current route
   const activeTab = getActiveTabFromRoute(location.pathname);
 
   // Stats state
@@ -48,14 +48,26 @@ export default function Users() {
   // Modal state - only for user creation
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
-  // Departments state for the modal
-  //add ids of departments as needed
-  // This is a placeholder; you can fetch this from your API later
+  // FIXED: Updated departments state with all the new departments
   const [departments, setDepartments] = useState([
-    { _id: "68730916eafef491d5e45f8c", name: "Computer Science Engineering" },
+    { _id: "68835bb728200e02b35ddefa", name: "DEPARTMENT OF PHYSICAL SCIENCES" },
+    { _id: "68835c2b28200e02b35ddf01", name: "DEPARTMENT OF LIFE SCIENCES" },
+    { _id: "68835c4d28200e02b35ddf08", name: "DEPARTMENT OF AGRICULTURE & FOOD TECHNOLOGY" },
+    { _id: "68835c6228200e02b35ddf0f", name: "DEPARTMENT OF PHARMACY & PHARMACEUTICAL SCIENCES" },
+    { _id: "68835c8428200e02b35ddf1d", name: "DEPARTMENT OF MANAGEMENT & COMMERCE" },
+    { _id: "68835cb928200e02b35ddf24", name: "DEPARTMENT OF HOTEL MANAGEMENT & CATERING SERVICES" },
+    { _id: "68835cc428200e02b35ddf2b", name: "DEPARTMENT OF COMPUTER APPLICATION" },
+    { _id: "68835ccf28200e02b35ddf32", name: "DEPARTMENT OF EDUCATION" },
+    { _id: "68835cda28200e02b35ddf39", name: "DEPARTMENT OF JOURNALISM" },
+    { _id: "68835ce828200e02b35ddf40", name: "DEPARTMENT OF HUMANITIES & LANGUAGES" },
+    { _id: "68835cf528200e02b35ddf47", name: "DEPARTMENT OF ARCHITECTURE" },
+    { _id: "68835d0228200e02b35ddf4e", name: "DEPARTMENT OF DESIGN & FINE ARTS" },
+    { _id: "68835d1528200e02b35ddf55", name: "DEPARTMENT OF LEGAL STUDIES" },
+    { _id: "68835d2728200e02b35ddf5c", name: "DEPARTMENT OF HEALTH SCIENCES" },
+    { _id: "6883600728200e02b35ddf95", name: "DEPARTMENT OF ENGINEERING" },
   ]);
 
-  // FIXED: Add sidebar handlers
+  // Sidebar handlers
   const handleSidebarClose = () => {
     setSidebarOpen(false);
   };
@@ -69,10 +81,11 @@ export default function Users() {
     // The navigation will be handled by Sidebar component
   };
 
-  // Fetch departments (you can implement this later)
+  // FIXED: Updated fetch departments with better fallback
   useEffect(() => {
     const fetchDepartments = async () => {
       try {
+        console.log("Fetching departments from API...");
         const response = await fetch(`${BASE_URL}/departments`, {
           method: "GET",
           credentials: "include",
@@ -80,20 +93,24 @@ export default function Users() {
             "Content-Type": "application/json",
           },
         });
+        
         if (response.ok) {
           const data = await response.json();
-          setDepartments(
-            data.departments || [
-              {
-                _id: "68730916eafef491d5e45f8c",
-                name: "Computer Science Engineering",
-              },
-            ]
-          );
+          console.log("Departments fetched from API:", data);
+          
+          // Update departments if API returns data, otherwise keep default
+          if (data.departments && data.departments.length > 0) {
+            setDepartments(data.departments);
+          } else {
+            console.log("API returned empty departments, using default list");
+          }
+        } else {
+          console.log("Failed to fetch departments from API, using default list");
         }
       } catch (error) {
         console.error("Error fetching departments:", error);
-        // Keep default department if fetch fails
+        console.log("Using default departments list due to error");
+        // Keep default departments if fetch fails
       }
     };
 
@@ -106,7 +123,7 @@ export default function Users() {
       try {
         const statsResponse = await fetch(`${BASE_URL}/private-data/counts`, {
           method: "GET",
-          credentials: "include", // Important: This sends cookies
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
           },
@@ -136,7 +153,7 @@ export default function Users() {
 
       const response = await fetch(`${BASE_URL}/private-data/users?${params}`, {
         method: "GET",
-        credentials: "include", // Important: This sends cookies
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },
@@ -198,18 +215,19 @@ export default function Users() {
 
   // Handle user deletion
   const handleDeleteUser = async (userId) => {
-   try {
-    const response = await fetch(
-      `${BASE_URL}/private-data/delete/unassigned-author`,
-      {
-        method: "DELETE",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ employee_id: userId })
-      }
-    );
+    try {
+      const response = await fetch(
+        `${BASE_URL}/private-data/delete/unassigned-author`,
+        {
+          method: "DELETE",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ employee_id: userId })
+        }
+      );
+      
       if (response.ok) {
         // Refresh the current page after deletion
         fetchUsers(pagination.currentPage, searchTerm);
@@ -219,7 +237,7 @@ export default function Users() {
         });
         if (statsResponse.ok) {
           const stats = await statsResponse.json();
-          setTotalUsers(stats?.counts?.users || 0);
+          setTotalUsers(stats?.counts?.authors || 0); // FIXED: Changed from users to authors
         }
       }
     } catch (error) {
@@ -227,22 +245,23 @@ export default function Users() {
     }
   };
 
-  // Handle create user - FIXED: Added debugging
+  // Handle create user
   const handleCreateUser = () => {
-    console.log("Create user button clicked!"); // Debug log
+    console.log("Create user button clicked!");
+    console.log("Available departments:", departments); // Debug log
     setIsCreateModalOpen(true);
   };
 
   // Handle modal close
   const handleModalClose = () => {
-    console.log("Modal closing..."); // Debug log
+    console.log("Modal closing...");
     setIsCreateModalOpen(false);
   };
 
   // Handle author creation submit
   const handleAuthorSubmit = async (userData) => {
     try {
-      console.log("Submitting author data:", userData); // Debug log
+      console.log("Submitting author data:", userData);
 
       const response = await fetch(`${BASE_URL}/register/author`, {
         method: "POST",
@@ -253,11 +272,11 @@ export default function Users() {
         body: JSON.stringify(userData),
       });
 
-      console.log("Response status:", response.status); // Debug log
+      console.log("Response status:", response.status);
 
       if (response.ok) {
         const result = await response.json();
-        console.log("Author created successfully:", result); // Debug log
+        console.log("Author created successfully:", result);
 
         // Close modal and refresh data
         setIsCreateModalOpen(false);
@@ -269,30 +288,34 @@ export default function Users() {
         });
         if (statsResponse.ok) {
           const stats = await statsResponse.json();
-          setTotalUsers(stats?.counts?.users || 0);
+          setTotalUsers(stats?.counts?.authors || 0); // FIXED: Changed from users to authors
         }
       } else {
         const errorData = await response.json();
         console.error("Error response:", errorData);
+        // FIXED: You might want to show an error message to the user here
+        alert(`Error creating author: ${errorData.message || 'Unknown error'}`);
       }
     } catch (error) {
       console.error("Error creating user:", error);
+      // FIXED: You might want to show an error message to the user here
+      alert(`Error creating author: ${error.message}`);
     }
   };
 
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
-      {/* FIXED: Sidebar with proper props */}
+      {/* Sidebar with proper props */}
       <Sidebar
         isOpen={sidebarOpen}
         onClose={handleSidebarClose}
-        activeTab={activeTab} // Now properly synced with route
+        activeTab={activeTab}
         onTabChange={handleTabChange}
       />
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col lg:ml-0">
-        {/* FIXED: Header with menu click handler */}
+        {/* Header with menu click handler */}
         <DashboardHeader onCreateUser={handleCreateUser} onMenuClick={handleMenuClick} />
 
         {/* Search Bar */}
@@ -322,7 +345,7 @@ export default function Users() {
         </main>
       </div>
 
-      {/* Register Author Modal - FIXED: Added departments prop and debug */}
+      {/* Register Author Modal with updated departments */}
       <CreateAuthorModal
         isOpen={isCreateModalOpen}
         onClose={handleModalClose}

@@ -16,7 +16,10 @@ const CreateAuthorModal = ({
   isOpen,
   onClose,
   onSubmit,
-  departments = [
+  departments, // This will be passed as prop or use default
+}) => {
+  // Define departments directly in component with fallback
+  const defaultDepartments = [
     { _id: "68835bb728200e02b35ddefa", name: "DEPARTMENT OF PHYSICAL SCIENCES" },
     { _id: "68835c2b28200e02b35ddf01", name: "DEPARTMENT OF LIFE SCIENCES" },
     { _id: "68835c4d28200e02b35ddf08", name: "DEPARTMENT OF AGRICULTURE & FOOD TECHNOLOGY" },
@@ -32,8 +35,11 @@ const CreateAuthorModal = ({
     { _id: "68835d1528200e02b35ddf55", name: "DEPARTMENT OF LEGAL STUDIES" },
     { _id: "68835d2728200e02b35ddf5c", name: "DEPARTMENT OF HEALTH SCIENCES" },
     { _id: "6883600728200e02b35ddf95", name: "DEPARTMENT OF ENGINEERING" },
-  ],
-}) => {
+  ];
+
+  // Use passed departments or default to embedded ones
+  const departmentsList = departments || defaultDepartments;
+
   const [formData, setFormData] = useState({
     employee_id: "",
     author_name: "",
@@ -118,7 +124,6 @@ const CreateAuthorModal = ({
           </button>
         </div>
 
-        {/* FIXED: Added form wrapper with onSubmit handler */}
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {/* Employee ID */}
           <div>
@@ -162,7 +167,7 @@ const CreateAuthorModal = ({
             </p>
           </div>
 
-          {/* Password - FIXED: Added show/hide toggle like admin modal */}
+          {/* Password */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               <Lock className="w-4 h-4 inline mr-1" />
@@ -202,32 +207,29 @@ const CreateAuthorModal = ({
             </p>
           </div>
 
-          {/*Department Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Department */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                <Building className="w-4 h-4 inline mr-1" />
-                Department *
-              </label>
-              <select
-                name="department"
-                value={formData.department}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
-              >
-                <option value="">Select a department</option>
-                {departments.map((dept) => (
-                  <option key={dept._id || dept.id} value={dept._id || dept.id}>
-                    {dept.name || dept.department_name}
-                  </option>
-                ))}
-              </select>
-              <p className="mt-1 text-xs text-gray-500">
-                Author's affiliated department
-              </p>
-            </div>
+          {/* Department */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              <Building className="w-4 h-4 inline mr-1" />
+              Department *
+            </label>
+            <select
+              name="department"
+              value={formData.department}
+              onChange={handleChange}
+              required
+              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
+            >
+              <option value="">Select a department</option>
+              {departmentsList.map((dept) => (
+                <option key={dept._id} value={dept._id}>
+                  {dept.name}
+                </option>
+              ))}
+            </select>
+            <p className="mt-1 text-xs text-gray-500">
+              Author's affiliated department ({departmentsList.length} departments available)
+            </p>
           </div>
 
           {/* Active Status */}
@@ -268,7 +270,7 @@ const CreateAuthorModal = ({
             </div>
           </div>
 
-          {/* Action Buttons - FIXED: Submit button now has type="submit" */}
+          {/* Action Buttons */}
           <div className="flex space-x-3 pt-4">
             <button
               type="button"
