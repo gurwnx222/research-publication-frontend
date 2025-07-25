@@ -26,19 +26,7 @@ const usePublications = (userInfo, searchTerm = '', currentPage = 1, limit = 10)
           case 'university':
             response = await ApiService.getPublications(currentPage, limit);
             break;
-          
-          case 'department':
-            if (userInfo.department) {
-              response = await ApiService.getPublicationsByDepartment(
-                userInfo.department, 
-                currentPage, 
-                limit
-              );
-            } else {
-              throw new Error('Department information not available');
-            }
-            break;
-          
+              
           case 'author':
             if (userInfo.authorName) {
               response = await ApiService.getPublicationsByAuthor(

@@ -51,18 +51,6 @@ class ApiService {
     return await this.handleResponse(response);
   }
 
-  // Get publications by department (Department level access)
-  static async getPublicationsByDepartment(department, page = 1, limit = 10) {
-    const queryParams = new URLSearchParams({
-      page: page.toString(),
-      limit: limit.toString(),
-      department: department
-    });
-
-    const response = await fetch(`${API_BASE_URL}/publications?${queryParams}`);
-    return await this.handleResponse(response);
-  }
-
   // Get publications by author (Author level access)
   static async getPublicationsByAuthor(authorName, page = 1, limit = 10) {
     const queryParams = new URLSearchParams({
@@ -75,15 +63,17 @@ class ApiService {
     return await this.handleResponse(response);
   }
 
-  // Search publications
+  // FIXED: Search publications method
   static async searchPublications(searchTerm, page = 1, limit = 10) {
+    // Build query parameters correctly
     const queryParams = new URLSearchParams({
+      q: searchTerm,        // The actual search term
       page: page.toString(),
-      limit: limit.toString(),
-      search: searchTerm
+      limit: limit.toString()
     });
 
-    const response = await fetch(`${API_BASE_URL}/publications?${queryParams}`);
+    // Use the query params correctly in the URL
+    const response = await fetch(`${API_BASE_URL}/publications/text-search?${queryParams}`);
     return await this.handleResponse(response);
   }
 }
