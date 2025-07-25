@@ -25,22 +25,38 @@ const PublicationsList = ({ publications, loading }) => {
   );
 
   // Publication item component
-const PublicationItem = ({ publication, index }) => (
-  <div 
-    key={index} 
-    className="p-4 bg-gray-50 rounded-lg border-l-4 border-blue-500 hover:bg-gray-100 transition-colors"
-  >
-    <h4 className="font-semibold text-gray-800 mb-1">{publication.title}</h4>
-    {/* FIX: Handle author as object */}
-    <p className="text-sm text-gray-600 mb-2">
-      {typeof publication.author === 'object' ? publication.author.name : publication.author}
-    </p>
-    {/* FIX: Handle department as object if needed */}
-    <p className="text-xs text-gray-500">
-      {typeof publication.department === 'object' ? publication.department.name : publication.department} • {publication.date}
-    </p>
-  </div>
-);
+  const PublicationItem = ({ publication, index }) => {
+    // Safe author handling
+    const getAuthorName = (author) => {
+      if (!author) return 'Unknown Author';
+      if (typeof author === 'string') return author;
+      if (typeof author === 'object' && author.name) return author.name;
+      return 'Unknown Author';
+    };
+
+    // Safe department handling
+    const getDepartmentName = (department) => {
+      if (!department) return 'Unknown Department';
+      if (typeof department === 'string') return department;
+      if (typeof department === 'object' && department.name) return department.name;
+      return 'Unknown Department';
+    };
+
+    return (
+      <div 
+        key={index}
+        className="p-4 bg-gray-50 rounded-lg border-l-4 border-blue-500 hover:bg-gray-100 transition-colors"
+      >
+        <h4 className="font-semibold text-gray-800 mb-1">{publication.title || 'Untitled'}</h4>
+        <p className="text-sm text-gray-600 mb-2">
+          {getAuthorName(publication.author)}
+        </p>
+        <p className="text-xs text-gray-500">
+          {getDepartmentName(publication.department)} • {publication.date || 'No date'}
+        </p>
+      </div>
+    );
+  };
 
   if (loading) {
     return <LoadingSkeleton />;

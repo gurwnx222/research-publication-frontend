@@ -86,14 +86,9 @@ const DepartmentCard = ({ department, onDelete }) => {
 const CreateDepartmentModal = ({ isOpen, onClose, onSubmit }) => {
   const [formData, setFormData] = useState({
     name: "",
-    code: "",
     university: "",
-    head: "",
-    description: "",
   });
   const [isLoading, setIsLoading] = useState(false);
-
-  const departmentCodes = ["CSE", "ECE", "ME", "CE", "EE", "IT"];
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -122,10 +117,7 @@ const CreateDepartmentModal = ({ isOpen, onClose, onSubmit }) => {
       // Reset form
       setFormData({
         name: "",
-        code: "",
         university: "",
-        head: "",
-        description: "",
       });
     } catch (error) {
       console.error("Error creating department:", error);
@@ -179,27 +171,6 @@ const CreateDepartmentModal = ({ isOpen, onClose, onSubmit }) => {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Department Code *
-            </label>
-            <select
-              name="code"
-              value={formData.code}
-              onChange={handleChange}
-              required
-              disabled={isLoading}
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 disabled:opacity-50"
-            >
-              <option value="">Select a code</option>
-              {departmentCodes.map((code) => (
-                <option key={code} value={code}>
-                  {code}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
               University *
             </label>
             <input
@@ -211,36 +182,6 @@ const CreateDepartmentModal = ({ isOpen, onClose, onSubmit }) => {
               disabled={isLoading}
               className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 disabled:opacity-50"
               placeholder="e.g., Tech University"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Department Head
-            </label>
-            <input
-              type="text"
-              name="head"
-              value={formData.head}
-              onChange={handleChange}
-              disabled={isLoading}
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 disabled:opacity-50"
-              placeholder="e.g., Dr. John Smith"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Description
-            </label>
-            <textarea
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              rows={3}
-              disabled={isLoading}
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 resize-none disabled:opacity-50"
-              placeholder="Brief description of the department..."
             />
           </div>
 
@@ -266,15 +207,12 @@ const CreateDepartmentModal = ({ isOpen, onClose, onSubmit }) => {
     </div>
   );
 };
-
 const DepartmentDashboard = () => {
   const BASE_URL = "http://localhost:3000/api";
-  const location = useLocation(); // Add this hook
+  const location = useLocation();
 
-  // ADDED: Add sidebar state management
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // ADDED: Function to determine active tab from current route
   const getActiveTabFromRoute = (pathname) => {
     const routeToTab = {
       "/dashboard": "dashboard",
@@ -282,10 +220,9 @@ const DepartmentDashboard = () => {
       "/department": "departments",
       "/admins": "admins",
     };
-    return routeToTab[pathname] || "departments"; // Default to 'departments' for this page
+    return routeToTab[pathname] || "departments";
   };
 
-  // ADDED: Derive activeTab from current route
   const activeTab = getActiveTabFromRoute(location.pathname);
 
   const [departments, setDepartments] = useState([]);
@@ -294,7 +231,6 @@ const DepartmentDashboard = () => {
   const [isLoadingCount, setIsLoadingCount] = useState(true);
   const [isLoadingDepartments, setIsLoadingDepartments] = useState(true);
 
-  // ADDED: Add sidebar handlers
   const handleSidebarClose = () => {
     setSidebarOpen(false);
   };
@@ -305,16 +241,8 @@ const DepartmentDashboard = () => {
 
   const handleTabChange = (tabId) => {
     console.log(`🔄 Department page - Tab change requested: ${tabId}`);
-    // The navigation will be handled by Sidebar component
   };
 
-  // ADDED: Handle create department from header
-  const handleCreateDepartment = () => {
-    console.log("Create department button clicked!"); // Debug log
-    setIsModalOpen(true);
-  };
-
-  // Fetch departments and count on component mount
   useEffect(() => {
     fetchDepartments();
     fetchDepartmentCount();
@@ -325,7 +253,7 @@ const DepartmentDashboard = () => {
     try {
       const response = await fetch(`${BASE_URL}/private-data/departments`, {
         method: "GET",
-        credentials: "include", // Include credentials for session management
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },
@@ -338,7 +266,6 @@ const DepartmentDashboard = () => {
       const result = await response.json();
       console.log("Departments data:", result);
 
-      // Updated to match your API response structure
       if (result.success && result.data && Array.isArray(result.data)) {
         setDepartments(result.data);
       } else {
@@ -358,7 +285,7 @@ const DepartmentDashboard = () => {
     try {
       const response = await fetch(`${BASE_URL}/private-data/counts`, {
         method: "GET",
-        credentials: "include", // Include credentials for session management
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },
@@ -371,11 +298,9 @@ const DepartmentDashboard = () => {
       const data = await response.json();
       console.log("Department count:", data);
 
-      // Update count based on the API response structure
       setTotalCount(data.counts?.departments || departments.length || 0);
     } catch (error) {
       console.error("Error fetching department count:", error);
-      // Fallback to departments array length if count API fails
       setTotalCount(departments.length);
     } finally {
       setIsLoadingCount(false);
@@ -402,9 +327,7 @@ const DepartmentDashboard = () => {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        // Remove from local state
         setDepartments((prev) => prev.filter((dept) => dept._id !== id));
-        // Refresh count after deletion
         fetchDepartmentCount();
 
         console.log("Department deleted successfully");
@@ -416,34 +339,27 @@ const DepartmentDashboard = () => {
   };
 
   const handleCreateDepartmentSubmit = (result) => {
-    // Add the new department to local state
     if (result.department) {
       setDepartments((prev) => [result.department, ...prev]);
     } else if (result.data) {
-      // Handle if the API returns data in 'data' property
       setDepartments((prev) => [result.data, ...prev]);
     }
     setIsModalOpen(false);
-    // Refresh count after creation
     fetchDepartmentCount();
   };
 
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
-      {/* UPDATED: Sidebar with proper props */}
       <Sidebar
         isOpen={sidebarOpen}
         onClose={handleSidebarClose}
-        activeTab={activeTab} // Now properly synced with route
+        activeTab={activeTab}
         onTabChange={handleTabChange}
       />
 
-      {/* Main Content Area */}
       <div className="flex-1 flex flex-col lg:ml-0">
-        {/* Main Content */}
         <div className="flex-1 p-8">
           <div className="max-w-7xl mx-auto">
-            {/* Header */}
             <div className="flex items-center justify-between mb-8">
               <div>
                 <h1 className="text-3xl font-bold text-gray-900 mb-2">
@@ -462,7 +378,6 @@ const DepartmentDashboard = () => {
               </button>
             </div>
 
-            {/* Stats Card */}
             <div className="mb-8">
               <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 max-w-sm">
                 <div className="flex items-center space-x-3">
@@ -479,7 +394,6 @@ const DepartmentDashboard = () => {
               </div>
             </div>
 
-            {/* Loading State */}
             {isLoadingDepartments ? (
               <div className="bg-white rounded-2xl p-12 text-center shadow-sm border border-gray-100">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
@@ -487,7 +401,6 @@ const DepartmentDashboard = () => {
               </div>
             ) : (
               <>
-                {/* Departments Grid */}
                 {departments.length > 0 ? (
                   <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
                     {departments.map((department) => (
@@ -522,7 +435,6 @@ const DepartmentDashboard = () => {
               </>
             )}
 
-            {/* Create Department Modal */}
             <CreateDepartmentModal
               isOpen={isModalOpen}
               onClose={() => setIsModalOpen(false)}
