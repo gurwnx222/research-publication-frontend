@@ -17,7 +17,21 @@ const CreateAuthorModal = ({
   onClose,
   onSubmit,
   departments = [
-    { _id: "68730916eafef491d5e45f8c", name: "Computer Science Engineering" },
+    { _id: "68835bb728200e02b35ddefa", name: "DEPARTMENT OF PHYSICAL SCIENCES" },
+    { _id: "68835c2b28200e02b35ddf01", name: "DEPARTMENT OF LIFE SCIENCES" },
+    { _id: "68835c4d28200e02b35ddf08", name: "DEPARTMENT OF AGRICULTURE & FOOD TECHNOLOGY" },
+    { _id: "68835c6228200e02b35ddf0f", name: "DEPARTMENT OF PHARMACY & PHARMACEUTICAL SCIENCES" },
+    { _id: "68835c8428200e02b35ddf1d", name: "DEPARTMENT OF MANAGEMENT & COMMERCE" },
+    { _id: "68835cb928200e02b35ddf24", name: "DEPARTMENT OF HOTEL MANAGEMENT & CATERING SERVICES" },
+    { _id: "68835cc428200e02b35ddf2b", name: "DEPARTMENT OF COMPUTER APPLICATION" },
+    { _id: "68835ccf28200e02b35ddf32", name: "DEPARTMENT OF EDUCATION" },
+    { _id: "68835cda28200e02b35ddf39", name: "DEPARTMENT OF JOURNALISM" },
+    { _id: "68835ce828200e02b35ddf40", name: "DEPARTMENT OF HUMANITIES & LANGUAGES" },
+    { _id: "68835cf528200e02b35ddf47", name: "DEPARTMENT OF ARCHITECTURE" },
+    { _id: "68835d0228200e02b35ddf4e", name: "DEPARTMENT OF DESIGN & FINE ARTS" },
+    { _id: "68835d1528200e02b35ddf55", name: "DEPARTMENT OF LEGAL STUDIES" },
+    { _id: "68835d2728200e02b35ddf5c", name: "DEPARTMENT OF HEALTH SCIENCES" },
+    { _id: "6883600728200e02b35ddf95", name: "DEPARTMENT OF ENGINEERING" },
   ],
 }) => {
   const [formData, setFormData] = useState({
