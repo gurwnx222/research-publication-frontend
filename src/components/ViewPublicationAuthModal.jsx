@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Lock, X, Building, Users, User } from 'lucide-react';
+import { Lock, X, Building, User } from 'lucide-react';
 import ApiService from '../utils/apiService';
 
 const AuthenticationModal = ({ isOpen, onClose, onAuthenticate }) => {
@@ -17,14 +17,6 @@ const AuthenticationModal = ({ isOpen, onClose, onAuthenticate }) => {
       icon: Building,
       password: 'university123',
       color: 'bg-blue-50 border-blue-200 text-blue-700'
-    },
-    {
-      id: 'department',
-      label: 'Department Access',
-      description: 'View department publications',
-      icon: Users,
-      password: 'department123',
-      color: 'bg-green-50 border-green-200 text-green-700'
     },
     {
       id: 'author',
@@ -211,7 +203,6 @@ const AuthenticationModal = ({ isOpen, onClose, onAuthenticate }) => {
             <h4 className="text-sm font-medium text-gray-900 mb-2">Access Credentials:</h4>
             <div className="text-xs text-gray-600 space-y-1">
               <div>• University: university123</div>
-              <div>• Department: department123</div>
               <div>• Author: author123</div>
             </div>
           </div>
