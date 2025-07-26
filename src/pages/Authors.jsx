@@ -19,12 +19,12 @@ export default function Users() {
   // Function to determine active tab from current route
   const getActiveTabFromRoute = (pathname) => {
     const routeToTab = {
-      '/dashboard': 'dashboard',
-      '/authors': 'authors', 
-      '/department': 'departments',
-      '/admins': 'admins'
+      "/dashboard": "dashboard",
+      "/authors": "authors",
+      "/department": "departments",
+      "/admins": "admins",
     };
-    return routeToTab[pathname] || 'authors';
+    return routeToTab[pathname] || "authors";
   };
 
   // Derive activeTab from current route
@@ -50,21 +50,49 @@ export default function Users() {
 
   // FIXED: Updated departments state with all the new departments
   const [departments, setDepartments] = useState([
-    { _id: "68835bb728200e02b35ddefa", name: "DEPARTMENT OF PHYSICAL SCIENCES" },
+    {
+      _id: "68835bb728200e02b35ddefa",
+      name: "DEPARTMENT OF PHYSICAL SCIENCES",
+    },
     { _id: "68835c2b28200e02b35ddf01", name: "DEPARTMENT OF LIFE SCIENCES" },
-    { _id: "68835c4d28200e02b35ddf08", name: "DEPARTMENT OF AGRICULTURE & FOOD TECHNOLOGY" },
-    { _id: "68835c6228200e02b35ddf0f", name: "DEPARTMENT OF PHARMACY & PHARMACEUTICAL SCIENCES" },
-    { _id: "68835c8428200e02b35ddf1d", name: "DEPARTMENT OF MANAGEMENT & COMMERCE" },
-    { _id: "68835cb928200e02b35ddf24", name: "DEPARTMENT OF HOTEL MANAGEMENT & CATERING SERVICES" },
-    { _id: "68835cc428200e02b35ddf2b", name: "DEPARTMENT OF COMPUTER APPLICATION" },
+    {
+      _id: "68835c4d28200e02b35ddf08",
+      name: "DEPARTMENT OF AGRICULTURE & FOOD TECHNOLOGY",
+    },
+    {
+      _id: "68835c6228200e02b35ddf0f",
+      name: "DEPARTMENT OF PHARMACY & PHARMACEUTICAL SCIENCES",
+    },
+    {
+      _id: "68835c8428200e02b35ddf1d",
+      name: "DEPARTMENT OF MANAGEMENT & COMMERCE",
+    },
+    {
+      _id: "68835cb928200e02b35ddf24",
+      name: "DEPARTMENT OF HOTEL MANAGEMENT & CATERING SERVICES",
+    },
+    {
+      _id: "68835cc428200e02b35ddf2b",
+      name: "DEPARTMENT OF COMPUTER APPLICATION",
+    },
     { _id: "68835ccf28200e02b35ddf32", name: "DEPARTMENT OF EDUCATION" },
     { _id: "68835cda28200e02b35ddf39", name: "DEPARTMENT OF JOURNALISM" },
-    { _id: "68835ce828200e02b35ddf40", name: "DEPARTMENT OF HUMANITIES & LANGUAGES" },
+    {
+      _id: "68835ce828200e02b35ddf40",
+      name: "DEPARTMENT OF HUMANITIES & LANGUAGES",
+    },
     { _id: "68835cf528200e02b35ddf47", name: "DEPARTMENT OF ARCHITECTURE" },
-    { _id: "68835d0228200e02b35ddf4e", name: "DEPARTMENT OF DESIGN & FINE ARTS" },
+    {
+      _id: "68835d0228200e02b35ddf4e",
+      name: "DEPARTMENT OF DESIGN & FINE ARTS",
+    },
     { _id: "68835d1528200e02b35ddf55", name: "DEPARTMENT OF LEGAL STUDIES" },
     { _id: "68835d2728200e02b35ddf5c", name: "DEPARTMENT OF HEALTH SCIENCES" },
     { _id: "6883600728200e02b35ddf95", name: "DEPARTMENT OF ENGINEERING" },
+    {
+      _id: "68838fc14776e47b81087d44",
+      name: "DEPARTMENT OF RESEARCH, INNOVATION AND INCUBATION",
+    },
   ]);
 
   // Sidebar handlers
@@ -93,11 +121,11 @@ export default function Users() {
             "Content-Type": "application/json",
           },
         });
-        
+
         if (response.ok) {
           const data = await response.json();
           console.log("Departments fetched from API:", data);
-          
+
           // Update departments if API returns data, otherwise keep default
           if (data.departments && data.departments.length > 0) {
             setDepartments(data.departments);
@@ -105,7 +133,9 @@ export default function Users() {
             console.log("API returned empty departments, using default list");
           }
         } else {
-          console.log("Failed to fetch departments from API, using default list");
+          console.log(
+            "Failed to fetch departments from API, using default list"
+          );
         }
       } catch (error) {
         console.error("Error fetching departments:", error);
@@ -224,10 +254,10 @@ export default function Users() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ employee_id: userId })
+          body: JSON.stringify({ employee_id: userId }),
         }
       );
-      
+
       if (response.ok) {
         // Refresh the current page after deletion
         fetchUsers(pagination.currentPage, searchTerm);
@@ -294,7 +324,7 @@ export default function Users() {
         const errorData = await response.json();
         console.error("Error response:", errorData);
         // FIXED: You might want to show an error message to the user here
-        alert(`Error creating author: ${errorData.message || 'Unknown error'}`);
+        alert(`Error creating author: ${errorData.message || "Unknown error"}`);
       }
     } catch (error) {
       console.error("Error creating user:", error);
@@ -316,7 +346,10 @@ export default function Users() {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col lg:ml-0">
         {/* Header with menu click handler */}
-        <DashboardHeader onCreateUser={handleCreateUser} onMenuClick={handleMenuClick} />
+        <DashboardHeader
+          onCreateUser={handleCreateUser}
+          onMenuClick={handleMenuClick}
+        />
 
         {/* Search Bar */}
         <div className="px-6">
@@ -328,7 +361,11 @@ export default function Users() {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 px-6">
-          <StatsCard title="Total Authors" count={totalUsers} icon={UsersIcon} />
+          <StatsCard
+            title="Total Authors"
+            count={totalUsers}
+            icon={UsersIcon}
+          />
         </div>
 
         {/* Users Grid */}

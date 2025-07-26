@@ -1,11 +1,49 @@
 import React, { useState, useEffect } from "react";
 
 const departments = [
-  { id: "68730916eafef491d5e45f8c", name: "CSE" },
-  { id: "6855087c6db49ddcf8a3014f", name: "Mechanical" },
-  { id: "6855087c6db49ddcf8a30150", name: "Electrical" },
-  { id: "6855087c6db49ddcf8a30151", name: "Civil" },
-  { id: "6855087c6db49ddcf8a30152", name: "Physics" },
+  {
+    _id: "68835bb728200e02b35ddefa",
+    name: "DEPARTMENT OF PHYSICAL SCIENCES",
+  },
+  { _id: "68835c2b28200e02b35ddf01", name: "DEPARTMENT OF LIFE SCIENCES" },
+  {
+    _id: "68835c4d28200e02b35ddf08",
+    name: "DEPARTMENT OF AGRICULTURE & FOOD TECHNOLOGY",
+  },
+  {
+    _id: "68835c6228200e02b35ddf0f",
+    name: "DEPARTMENT OF PHARMACY & PHARMACEUTICAL SCIENCES",
+  },
+  {
+    _id: "68835c8428200e02b35ddf1d",
+    name: "DEPARTMENT OF MANAGEMENT & COMMERCE",
+  },
+  {
+    _id: "68835cb928200e02b35ddf24",
+    name: "DEPARTMENT OF HOTEL MANAGEMENT & CATERING SERVICES",
+  },
+  {
+    _id: "68835cc428200e02b35ddf2b",
+    name: "DEPARTMENT OF COMPUTER APPLICATION",
+  },
+  { _id: "68835ccf28200e02b35ddf32", name: "DEPARTMENT OF EDUCATION" },
+  { _id: "68835cda28200e02b35ddf39", name: "DEPARTMENT OF JOURNALISM" },
+  {
+    _id: "68835ce828200e02b35ddf40",
+    name: "DEPARTMENT OF HUMANITIES & LANGUAGES",
+  },
+  { _id: "68835cf528200e02b35ddf47", name: "DEPARTMENT OF ARCHITECTURE" },
+  {
+    _id: "68835d0228200e02b35ddf4e",
+    name: "DEPARTMENT OF DESIGN & FINE ARTS",
+  },
+  { _id: "68835d1528200e02b35ddf55", name: "DEPARTMENT OF LEGAL STUDIES" },
+  { _id: "68835d2728200e02b35ddf5c", name: "DEPARTMENT OF HEALTH SCIENCES" },
+  { _id: "6883600728200e02b35ddf95", name: "DEPARTMENT OF ENGINEERING" },
+  {
+    _id: "68838fc14776e47b81087d44",
+    name: "DEPARTMENT OF RESEARCH, INNOVATION AND INCUBATION",
+  },
 ];
 
 const journalTypes = [
@@ -68,48 +106,49 @@ export default function JournalRegistrationForm() {
   const [submit, setIsSubmitting] = useState(false);
   const API_BASE_URL = "http://localhost:3000/api";
   // Auto-fill employee data when employee ID changes
-useEffect(() => {
-  const fetchEmployeeData = async (employeeId) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/authors/employee-id?q=${employeeId}`);
-      
-      if (response.ok) {
-        const employee = await response.json();
-        console.log("Employee data fetched:", employee);
-        setForm(prev => ({
-          ...prev,
-          authorName: employee.authorBio.author_name,
-          authorDeptId: employee.authorBio.department,
-        }));
-        setIsEmployeeFound(true);
-      } else {
-        // Employee not found or other error
+
+  useEffect(() => {
+    const fetchEmployeeData = async (employeeId) => {
+      try {
+        const response = await fetch(
+          `${API_BASE_URL}/authors/employee-id?q=${employeeId}`
+        );
+
+        if (response.ok) {
+          const employee = await response.json();
+          console.log("Employee data fetched:", employee);
+
+          setForm((prev) => ({
+            ...prev,
+            authorName: employee.authorBio.author_name,
+            authorDeptId: employee.authorBio.department, // Make sure this matches the department _id
+          }));
+          setIsEmployeeFound(true);
+        } else {
+          setIsEmployeeFound(false);
+          setForm((prev) => ({
+            ...prev,
+            authorName: "",
+            authorDeptId: "",
+          }));
+        }
+      } catch (error) {
+        console.error("Error fetching employee data:", error);
         setIsEmployeeFound(false);
-        // Optionally clear the fields
-        setForm(prev => ({
+        setForm((prev) => ({
           ...prev,
-          authorName: '',
-          authorDeptId: '',
+          authorName: "",
+          authorDeptId: "",
         }));
       }
-    } catch (error) {
-      console.error('Error fetching employee data:', error);
-      setIsEmployeeFound(false);
-      // Optionally clear the fields on error
-      setForm(prev => ({
-        ...prev,
-        authorName: '',
-        authorDeptId: '',
-      }));
-    }
-  };
+    };
 
-  if (form.employeeId && form.employeeId.length >= 4) {
-    fetchEmployeeData(form.employeeId);
-  } else {
-    setIsEmployeeFound(false);
-  }
-}, [form.employeeId]);
+    if (form.employeeId && form.employeeId.length >= 4) {
+      fetchEmployeeData(form.employeeId);
+    } else {
+      setIsEmployeeFound(false);
+    }
+  }, [form.employeeId]);
 
   const validate = () => {
     const newErrors = {};
@@ -635,7 +674,7 @@ useEffect(() => {
             >
               <option value="">Select department</option>
               {departments.map((dept) => (
-                <option key={dept.id} value={dept.id}>
+                <option key={dept._id} value={dept._id}>
                   {dept.name}
                 </option>
               ))}
