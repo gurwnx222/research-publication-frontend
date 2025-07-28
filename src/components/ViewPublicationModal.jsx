@@ -38,21 +38,6 @@ const Publication = ({ publication, onDownload, onViewPdf }) => {
     if (department && department.name) {
       return department.name;
     }
-    // Create dummy department names based on common department IDs
-    const deptMap = {
-      'CSE': 'Department of Computer Science',
-      'ECE': 'Department of Electronics and Communication',
-      'ME': 'Department of Mechanical Engineering',
-      'CE': 'Department of Civil Engineering',
-      'IT': 'Department of Information Technology'
-    };
-    
-    // If authorDeptId exists, try to match it with department mapping
-    if (authorDeptId) {
-      const deptId = typeof authorDeptId === 'object' ? authorDeptId.toString() : authorDeptId;
-      return deptMap[deptId] || `Department (ID: ${deptId})`;
-    }
-    
     return 'Department not specified';
   };
 
