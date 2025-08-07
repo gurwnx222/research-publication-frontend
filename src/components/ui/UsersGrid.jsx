@@ -20,7 +20,7 @@ const UsersGrid = ({
   if (users.length === 0) {
     return <EmptyState searchTerm={searchTerm} onCreateUser={onCreateUser} />;
   }
-  const BASE_URL = "http://localhost:3000/api";
+  const BASE_URL = "https://research-publication.onrender.com/api";
 
   return (
     <>
