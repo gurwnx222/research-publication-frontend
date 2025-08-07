@@ -208,7 +208,7 @@ const CreateDepartmentModal = ({ isOpen, onClose, onSubmit }) => {
   );
 };
 const DepartmentDashboard = () => {
-  const BASE_URL = "http://localhost:3000/api";
+  const BASE_URL = "https://research-publication.onrender.com/api";
   const location = useLocation();
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -311,7 +311,7 @@ const DepartmentDashboard = () => {
     if (window.confirm("Are you sure you want to delete this department?")) {
       try {
         const response = await fetch(
-          "http://localhost:3000/api/private-data/delete/department/",
+          "https://research-publication.onrender.com/api/private-data/delete/department/",
           {
             method: "DELETE",
             credentials: "include",

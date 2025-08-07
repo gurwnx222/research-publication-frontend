@@ -9,7 +9,7 @@ import "../App.css";
 import { Shield } from "lucide-react";
 
 export default function Admins() {
-  const BASE_URL = "http://localhost:3000/api";
+  const BASE_URL = "https://research-publication.onrender.com/api";
   const location = useLocation(); // Add this hook
 
   // ADDED: Sidebar state management
@@ -18,12 +18,12 @@ export default function Admins() {
   // ADDED: Function to determine active tab from current route
   const getActiveTabFromRoute = (pathname) => {
     const routeToTab = {
-      '/dashboard': 'dashboard',
-      '/authors': 'authors', 
-      '/department': 'departments',
-      '/admins': 'admins'
+      "/dashboard": "dashboard",
+      "/authors": "authors",
+      "/department": "departments",
+      "/admins": "admins",
     };
-    return routeToTab[pathname] || 'admins'; // Default to 'admins' for this page
+    return routeToTab[pathname] || "admins"; // Default to 'admins' for this page
   };
 
   // ADDED: Derive activeTab from current route
@@ -67,7 +67,7 @@ export default function Admins() {
       try {
         const statsResponse = await fetch(`${BASE_URL}/private-data/admins`, {
           method: "GET",
-          credentials: 'include', // Important: This sends cookies
+          credentials: "include", // Important: This sends cookies
           headers: {
             "Content-Type": "application/json",
           },
@@ -96,13 +96,16 @@ export default function Admins() {
         ...(search && { search }),
       });
 
-      const response = await fetch(`${BASE_URL}/private-data/admins?${params}`, {
-        method: "GET",
-        credentials: 'include', // Important: This sends cookies
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await fetch(
+        `${BASE_URL}/private-data/admins?${params}`,
+        {
+          method: "GET",
+          credentials: "include", // Important: This sends cookies
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
       console.log("Fetching admin data for:", response.url);
 
       if (!response.ok) {
@@ -154,13 +157,16 @@ export default function Admins() {
   // Handle admin deletion
   const handleDeleteAdmin = async (adminId) => {
     try {
-      const response = await fetch(`${BASE_URL}/private-data/admins/${adminId}`, {
-        method: "DELETE",
-        credentials: 'include',
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await fetch(
+        `${BASE_URL}/private-data/admins/${adminId}`,
+        {
+          method: "DELETE",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       if (response.ok) {
         // Refresh the current page after deletion
@@ -168,7 +174,7 @@ export default function Admins() {
         // Also refresh stats
         const statsResponse = await fetch(`${BASE_URL}/private-data/counts`, {
           method: "GET",
-          credentials: 'include',
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
           },
@@ -198,14 +204,14 @@ export default function Admins() {
     try {
       const response = await fetch(`${BASE_URL}/register/admin`, {
         method: "POST",
-        credentials: 'include',
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(adminData),
       });
       console.log("Creating admin with data:", adminData);
-      
+
       if (response.ok) {
         // Close modal and refresh data
         setIsCreateModalOpen(false);
@@ -213,7 +219,7 @@ export default function Admins() {
         // Refresh stats
         const statsResponse = await fetch(`${BASE_URL}/private-data/counts`, {
           method: "GET",
-          credentials: 'include',
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
           },
@@ -242,9 +248,9 @@ export default function Admins() {
       <div className="flex-1 flex flex-col lg:ml-0">
         {/* Stats Cards - Only Total Admins */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 px-6 pt-6">
-          <StatsCard 
-            title="Total Admins" 
-            count={totalAdmins} 
+          <StatsCard
+            title="Total Admins"
+            count={totalAdmins}
             icon={Shield}
             gradient="from-purple-500 to-indigo-600"
             bgGradient="from-purple-50 to-indigo-50"

@@ -10,7 +10,7 @@ import "../App.css";
 import { Users as UsersIcon } from "lucide-react";
 
 export default function Users() {
-  const BASE_URL = "http://localhost:3000/api";
+  const BASE_URL = "https://research-publication.onrender.com/api";
   const location = useLocation();
 
   // Sidebar state management

@@ -28,7 +28,7 @@ const Dashboard = () => {
    */
   const fetchData = async () => {
     setLoading(true);
-    const BASE_URL = "http://localhost:3000/api";
+    const BASE_URL = "https://research-publication.onrender.com/api";
     try {
       // Simulate API delay
       await new Promise((resolve) => setTimeout(resolve, 1500));
@@ -36,7 +36,7 @@ const Dashboard = () => {
       // FIXED: Added credentials: 'include' to send session cookies
       const response = await fetch(`${BASE_URL}/publications`, {
         method: "GET",
-        credentials: 'include', // This sends session cookies
+        credentials: "include", // This sends session cookies
         headers: {
           "Content-Type": "application/json",
         },
@@ -45,33 +45,31 @@ const Dashboard = () => {
       if (!response.ok) {
         if (response.status === 401) {
           // Handle unauthorized - redirect to login
-          window.location.href = '/';
+          window.location.href = "/";
           return;
         }
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
-      const publicationsData = data?.publications || "error getting publications";
+      const publicationsData =
+        data?.publications || "error getting publications";
       console.log("Fetched publications:", data);
       setPublications(publicationsData);
 
       // FIXED: Added credentials to stats request too
-      const statsResponse = await fetch(
-        `${BASE_URL}/private-data/counts`,
-        {
-          method: "GET",
-          credentials: 'include', // This sends session cookies
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const statsResponse = await fetch(`${BASE_URL}/private-data/counts`, {
+        method: "GET",
+        credentials: "include", // This sends session cookies
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
       if (!statsResponse.ok) {
         if (statsResponse.status === 401) {
           // Handle unauthorized - redirect to login
-          window.location.href = '/';
+          window.location.href = "/";
           return;
         }
         throw new Error(`HTTP error! status: ${statsResponse.status}`);
