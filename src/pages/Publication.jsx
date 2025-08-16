@@ -105,7 +105,7 @@ export default function JournalRegistrationForm() {
   });
   const [submit, setIsSubmitting] = useState(false);
   const [formSubmitting, setFormSubmitting] = useState(false);
-  const API_BASE_URL = "http://localhost:3000/api";
+  const API_BASE_URL = "https://research-publication.onrender.com/api";
   // Auto-fill employee data when employee ID changes
 
   useEffect(() => {
