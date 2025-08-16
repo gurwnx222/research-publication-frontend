@@ -104,6 +104,7 @@ export default function JournalRegistrationForm() {
     isError: false,
   });
   const [submit, setIsSubmitting] = useState(false);
+  const [formSubmitting, setFormSubmitting] = useState(false);
   const API_BASE_URL = "http://localhost:3000/api";
   // Auto-fill employee data when employee ID changes
 
@@ -323,6 +324,7 @@ export default function JournalRegistrationForm() {
     }
 
     setIsSubmitting(true);
+    setFormSubmitting(true);
     setSubmitStatus({
       step: "preparing",
       message: "Preparing submission...",
@@ -536,8 +538,10 @@ export default function JournalRegistrationForm() {
       alert("Submission failed: " + error.message);
     } finally {
       setIsSubmitting(false);
+      setFormSubmitting(false);
     }
   };
+
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
       <div className="max-w-3xl mx-auto">
@@ -989,7 +993,7 @@ export default function JournalRegistrationForm() {
               onClick={handleSubmit}
               className="w-full bg-gray-800 text-white py-3 px-6 rounded-lg font-medium hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
             >
-              Submit Publication
+              {formSubmitting ? "Submitting..." : "Submit Publication"}
             </button>
           </div>
         </div>
